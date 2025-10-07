@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">BendaKu</string>
+
+    <!-- Login & Registration -->
+    <string name="login">Login</string>
+    <string name="register">Daftar</string>
+    <string name="email">Email UPNVJ</string>
+    <string name="password">Password</string>
+    <string name="full_name">Nama Lengkap</string>
+    <string name="phone">No. Telepon</string>
+    <string name="student_id">NIM/NIP</string>
+    <string name="confirm_password">Konfirmasi Password</string>
+    <string name="email_validation">Gunakan email @upnvj.ac.id</string>
+
+    <!-- Main -->
+    <string name="lost_items">Barang Hilang</string>
+    <string name="found_items">Barang Ditemukan</string>
+    <string name="add_report">Tambah Laporan</string>
+    <string name="search">Cari barang...</string>
+
+    <!-- Add Report -->
+    <string name="report_lost">Laporkan Barang Hilang</string>
+    <string name="report_found">Laporkan Barang Ditemukan</string>
+    <string name="item_name">Nama Barang</string>
+    <string name="description">Deskripsi</string>
+    <string name="location">Lokasi</string>
+    <string name="date_time">Tanggal &amp; Waktu</string>
+    <string name="upload_photo">Upload Foto</string>
+    <string name="submit">Kirim</string>
+
+    <!-- Item Details -->
+    <string name="claim_item">Klaim Barang Ini</string>
+    <string name="reported_by">Dilaporkan oleh</string>
+    <string name="contact_info">Info Kontak</string>
+
+    <!-- Claim Form -->
+    <string name="claim_form">Form Klaim</string>
+    <string name="proof_photo">Foto Bukti</string>
+    <string name="claim_description">Deskripsi Klaim</string>
+    <string name="submit_claim">Kirim Klaim</string>
+
+    <!-- Admin Panel -->
+    <string name="admin_panel">Panel Admin</string>
+    <string name="pending_claims">Klaim Menunggu Verifikasi</string>
+    <string name="approve">Setujui</string>
+    <string name="reject">Tolak</string>
+
+    <!-- Messages -->
+    <string name="no_items_found">Belum ada barang yang dilaporkan</string>
+    <string name="login_required">Silakan login terlebih dahulu</string>
+    <string name="report_success">Laporan berhasil dikirim</string>
+    <string name="claim_success">Klaim berhasil dikirim</string>
+    <string name="error_occurred">Terjadi kesalahan</string>
+</resources>
