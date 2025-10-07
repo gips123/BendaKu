@@ -59,21 +59,21 @@ public class DummyDataHelper {
         // Lost items
         Item item1 = new Item("Dompet Kulit Coklat", "Dompet kulit warna coklat berisi KTP dan kartu ATM",
                              "Gedung Rektorat Lt. 2", "03 Okt 2024, 10:30",
-                             "https://via.placeholder.com/300x200?text=Dompet", "lost", "2", "Budi Santoso", "081234567891");
+                             "drawable://dompet", "lost", "2", "Budi Santoso", "081234567891");
         item1.setId("1");
         item1.setCreatedAt(currentDate);
         dummyItems.add(item1);
 
         Item item2 = new Item("Laptop ASUS Vivobook", "Laptop ASUS Vivobook 14 warna silver dengan stiker UPNVJ",
                              "Perpustakaan Lt. 3", "02 Okt 2024, 14:15",
-                             "https://via.placeholder.com/300x200?text=Laptop", "lost", "3", "Siti Nurhaliza", "081234567892");
+                             "drawable://sus", "lost", "3", "Siti Nurhaliza", "081234567892");
         item2.setId("2");
         item2.setCreatedAt(currentDate);
         dummyItems.add(item2);
 
         Item item3 = new Item("Kunci Motor Honda", "Kunci motor Honda Beat warna putih dengan gantungan Hello Kitty",
                              "Parkiran Gedung B", "04 Okt 2024, 16:45",
-                             "https://via.placeholder.com/300x200?text=Kunci+Motor", "lost", "4", "Ahmad Fadli", "081234567893");
+                             "drawable://kunci", "lost", "4", "Ahmad Fadli", "081234567893");
         item3.setId("3");
         item3.setCreatedAt(currentDate);
         dummyItems.add(item3);
@@ -81,24 +81,32 @@ public class DummyDataHelper {
         // Found items
         Item item4 = new Item("Handphone Samsung", "Samsung Galaxy A23 warna biru dengan case transparan",
                              "Kantin Fakultas Teknik", "05 Okt 2024, 12:20",
-                             "https://via.placeholder.com/300x200?text=Samsung+HP", "found", "5", "Rina Kartika", "081234567894");
+                             "drawable://samsung", "found", "5", "Rina Kartika", "081234567894");
         item4.setId("4");
         item4.setCreatedAt(currentDate);
         dummyItems.add(item4);
 
         Item item5 = new Item("Jaket Hoodie Hitam", "Jaket hoodie warna hitam ukuran L merk Uniqlo",
                              "Aula Serba Guna", "06 Okt 2024, 09:15",
-                             "https://via.placeholder.com/300x200?text=Jaket+Hoodie", "found", "2", "Budi Santoso", "081234567891");
+                             "drawable://hoodie", "found", "2", "Budi Santoso", "081234567891");
         item5.setId("5");
         item5.setCreatedAt(currentDate);
         dummyItems.add(item5);
 
         Item item6 = new Item("Powerbank Xiaomi", "Powerbank Xiaomi 10000mAh warna putih dengan kabel micro USB",
                              "Lab Komputer Gedung C", "07 Okt 2024, 11:30",
-                             "https://via.placeholder.com/300x200?text=Powerbank", "found", "3", "Siti Nurhaliza", "081234567892");
+                             "drawable://powerbank", "found", "3", "Siti Nurhaliza", "081234567892");
         item6.setId("6");
         item6.setCreatedAt(currentDate);
         dummyItems.add(item6);
+
+        // Add more items using your available images
+        Item item7 = new Item("Tas Hitam Susuk", "Tas hitam dengan desain unik ditemukan di area parkir",
+                             "Parkiran Gedung A", "08 Okt 2024, 08:45",
+                             "drawable://sus", "found", "6", "Maria Sari", "081234567895");
+        item7.setId("7");
+        item7.setCreatedAt(currentDate);
+        dummyItems.add(item7);
     }
 
     private static void initializeDummyClaims() {

@@ -39,6 +39,8 @@ public class ItemListFragment extends Fragment {
     private LinearLayout loadingState;
     private ItemAdapter adapter;
     private ApiService apiService;
+    private List<Item> allItems = new ArrayList<>();
+    private String currentSearchQuery = "";
 
     public static ItemListFragment newInstance(String type) {
         ItemListFragment fragment = new ItemListFragment();
@@ -105,9 +107,11 @@ public class ItemListFragment extends Fragment {
                     if (response.isSuccess()) {
                         List<Item> items = response.getData();
                         if (items != null && !items.isEmpty()) {
-                            adapter.updateItems(items);
-                            showContent();
+                            allItems = new ArrayList<>(items);
+                            // Apply current search if any
+                            performSearch(currentSearchQuery);
                         } else {
+                            allItems.clear();
                             showEmpty();
                         }
                     } else {
@@ -116,6 +120,42 @@ public class ItemListFragment extends Fragment {
                 });
             }
         }).start();
+    }
+
+    // Add the missing performSearch method
+    public void performSearch(String query) {
+        currentSearchQuery = query;
+
+        if (allItems.isEmpty()) {
+            return;
+        }
+
+        List<Item> filteredItems;
+
+        if (query == null || query.trim().isEmpty()) {
+            // Show all items if search is empty
+            filteredItems = new ArrayList<>(allItems);
+        } else {
+            // Filter items based on search query
+            String searchQuery = query.toLowerCase().trim();
+            filteredItems = new ArrayList<>();
+            for (Item item : allItems) {
+                if (item.getName().toLowerCase().contains(searchQuery) ||
+                    item.getDescription().toLowerCase().contains(searchQuery) ||
+                    item.getLocation().toLowerCase().contains(searchQuery)) {
+                    filteredItems.add(item);
+                }
+            }
+        }
+
+        // Update adapter with filtered results
+        adapter.updateItems(filteredItems);
+
+        if (filteredItems.isEmpty()) {
+            showEmpty();
+        } else {
+            showContent();
+        }
     }
 
     private void showContent() {
@@ -149,7 +189,7 @@ public class ItemListFragment extends Fragment {
 
     private void onItemClick(Item item) {
         Intent intent = new Intent(getContext(), ItemDetailActivity.class);
-        intent.putExtra("item_id", item.getId());
+        intent.putExtra("item", item);
         startActivity(intent);
     }
 }

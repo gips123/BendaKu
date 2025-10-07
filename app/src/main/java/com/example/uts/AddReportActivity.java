@@ -1,17 +1,15 @@
 package com.example.uts;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
@@ -20,7 +18,9 @@ import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Item;
 import com.example.bendaku.utils.SessionManager;
 import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
@@ -37,16 +37,18 @@ import retrofit2.Response;
 
 public class AddReportActivity extends AppCompatActivity {
 
+    private MaterialButtonToggleGroup toggleGroupType;
     private MaterialButton btnLost, btnFound, btnSubmit;
     private ImageView ivPreview;
-    private View uploadPlaceholder;
-    private TextInputEditText etItemName, etDescription, etLocation, etDateTime;
+    private View uploadPlaceholder, photoUploadArea;
+    private TextInputEditText etItemName, etDescription, etLocation, etName, etPhone;
 
     private String reportType = "lost";
     private Uri selectedImageUri;
     private SessionManager sessionManager;
     private ApiService apiService;
-    private Calendar selectedDateTime;
+
+    private ActivityResultLauncher<Intent> imagePickerLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,21 +58,35 @@ public class AddReportActivity extends AppCompatActivity {
         initViews();
         initServices();
         setupClickListeners();
+        setupImagePicker();
         setReportType("lost");
     }
 
     private void initViews() {
+        // Toolbar setup
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        // Modern toggle group and buttons
+        toggleGroupType = findViewById(R.id.toggleGroupType);
         btnLost = findViewById(R.id.btnLost);
         btnFound = findViewById(R.id.btnFound);
         btnSubmit = findViewById(R.id.btnSubmit);
+
+        // Photo upload elements
         ivPreview = findViewById(R.id.ivPreview);
         uploadPlaceholder = findViewById(R.id.uploadPlaceholder);
+        photoUploadArea = findViewById(R.id.photoUploadArea);
+
+        // Form inputs - updated for new layout
         etItemName = findViewById(R.id.etItemName);
         etDescription = findViewById(R.id.etDescription);
         etLocation = findViewById(R.id.etLocation);
-        etDateTime = findViewById(R.id.etDateTime);
-
-        selectedDateTime = Calendar.getInstance();
+        etName = findViewById(R.id.etName);
+        etPhone = findViewById(R.id.etPhone);
     }
 
     private void initServices() {
@@ -78,26 +94,60 @@ public class AddReportActivity extends AppCompatActivity {
         apiService = ApiClient.getApiService();
     }
 
+    private void setupImagePicker() {
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                        selectedImageUri = result.getData().getData();
+                        if (selectedImageUri != null) {
+                            ivPreview.setImageURI(selectedImageUri);
+                            ivPreview.setVisibility(View.VISIBLE);
+                            uploadPlaceholder.setVisibility(View.GONE);
+                        }
+                    }
+                }
+        );
+    }
+
     private void setupClickListeners() {
-        btnLost.setOnClickListener(v -> setReportType("lost"));
-        btnFound.setOnClickListener(v -> setReportType("found"));
+        // Toggle group listener for modern type selection
+        toggleGroupType.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (isChecked) {
+                if (checkedId == R.id.btnLost) {
+                    setReportType("lost");
+                } else if (checkedId == R.id.btnFound) {
+                    setReportType("found");
+                }
+            }
+        });
 
-        findViewById(R.id.cardImage).setOnClickListener(v -> selectImage());
+        // Photo upload area click
+        photoUploadArea.setOnClickListener(v -> selectImage());
 
-        etDateTime.setOnClickListener(v -> showDateTimePicker());
-
+        // Submit button
         btnSubmit.setOnClickListener(v -> submitReport());
+
+        // Toolbar back button
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void setReportType(String type) {
         this.reportType = type;
 
+        // Update button selection
         if ("lost".equals(type)) {
-            btnLost.setStrokeWidth(4);
-            btnFound.setStrokeWidth(1);
+            toggleGroupType.check(R.id.btnLost);
         } else {
-            btnLost.setStrokeWidth(1);
-            btnFound.setStrokeWidth(4);
+            toggleGroupType.check(R.id.btnFound);
         }
     }
 
@@ -106,152 +156,82 @@ public class AddReportActivity extends AppCompatActivity {
                 .crop()
                 .compress(1024)
                 .maxResultSize(1080, 1080)
-                .start();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK && data != null) {
-            selectedImageUri = data.getData();
-            ivPreview.setImageURI(selectedImageUri);
-            uploadPlaceholder.setVisibility(View.GONE);
-        }
-    }
-
-    private void showDateTimePicker() {
-        Calendar calendar = Calendar.getInstance();
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) -> {
-                    selectedDateTime.set(Calendar.YEAR, year);
-                    selectedDateTime.set(Calendar.MONTH, month);
-                    selectedDateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                    showTimePicker();
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        );
-
-        datePickerDialog.show();
-    }
-
-    private void showTimePicker() {
-        Calendar calendar = Calendar.getInstance();
-
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                this,
-                (view, hourOfDay, minute) -> {
-                    selectedDateTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    selectedDateTime.set(Calendar.MINUTE, minute);
-
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
-                    etDateTime.setText(sdf.format(selectedDateTime.getTime()));
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true
-        );
-
-        timePickerDialog.show();
+                .createIntent(intent -> {
+                    imagePickerLauncher.launch(intent);
+                    return null;
+                });
     }
 
     private void submitReport() {
         String itemName = etItemName.getText().toString().trim();
         String description = etDescription.getText().toString().trim();
         String location = etLocation.getText().toString().trim();
-        String dateTime = etDateTime.getText().toString().trim();
+        String name = etName.getText().toString().trim();
+        String phone = etPhone.getText().toString().trim();
 
-        if (!validateInput(itemName, description, location, dateTime)) {
-            return;
-        }
-
-        if (selectedImageUri == null) {
-            Toast.makeText(this, "Silakan pilih foto barang", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        setLoading(true);
-
-        // Prepare multipart data
-        File imageFile = new File(selectedImageUri.getPath());
-        RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), imageFile);
-        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("image", imageFile.getName(), requestFile);
-
-        RequestBody nameBody = RequestBody.create(MediaType.parse("text/plain"), itemName);
-        RequestBody descBody = RequestBody.create(MediaType.parse("text/plain"), description);
-        RequestBody locationBody = RequestBody.create(MediaType.parse("text/plain"), location);
-        RequestBody dateTimeBody = RequestBody.create(MediaType.parse("text/plain"), dateTime);
-        RequestBody typeBody = RequestBody.create(MediaType.parse("text/plain"), reportType);
-        RequestBody reporterIdBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getId());
-        RequestBody reporterNameBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getFullName());
-        RequestBody reporterPhoneBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getPhone());
-
-        Call<ApiResponse<Item>> call = apiService.createItem(
-                nameBody, descBody, locationBody, dateTimeBody, typeBody,
-                reporterIdBody, reporterNameBody, reporterPhoneBody, imagePart
-        );
-
-        call.enqueue(new Callback<ApiResponse<Item>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Item>> call, Response<ApiResponse<Item>> response) {
-                setLoading(false);
-
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Item> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        Toast.makeText(AddReportActivity.this, getString(R.string.report_success), Toast.LENGTH_SHORT).show();
-                        finish();
-                    } else {
-                        Toast.makeText(AddReportActivity.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(AddReportActivity.this, "Gagal mengirim laporan", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiResponse<Item>> call, Throwable t) {
-                setLoading(false);
-                Toast.makeText(AddReportActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private boolean validateInput(String itemName, String description, String location, String dateTime) {
+        // Validation
         if (TextUtils.isEmpty(itemName)) {
-            etItemName.setError("Nama barang tidak boleh kosong");
+            etItemName.setError("Nama barang harus diisi");
             etItemName.requestFocus();
-            return false;
+            return;
         }
 
         if (TextUtils.isEmpty(description)) {
-            etDescription.setError("Deskripsi tidak boleh kosong");
+            etDescription.setError("Deskripsi harus diisi");
             etDescription.requestFocus();
-            return false;
+            return;
         }
 
         if (TextUtils.isEmpty(location)) {
-            etLocation.setError("Lokasi tidak boleh kosong");
+            etLocation.setError("Lokasi harus diisi");
             etLocation.requestFocus();
-            return false;
+            return;
         }
 
-        if (TextUtils.isEmpty(dateTime)) {
-            etDateTime.setError("Tanggal & waktu tidak boleh kosong");
-            etDateTime.requestFocus();
-            return false;
+        if (TextUtils.isEmpty(name)) {
+            etName.setError("Nama lengkap harus diisi");
+            etName.requestFocus();
+            return;
         }
 
-        return true;
+        if (TextUtils.isEmpty(phone)) {
+            etPhone.setError("Nomor telepon harus diisi");
+            etPhone.requestFocus();
+            return;
+        }
+
+        // Show loading state
+        btnSubmit.setEnabled(false);
+        btnSubmit.setText("Mengirim...");
+
+        // Simulate submission without API call (since backend is not ready)
+        simulateSubmission(itemName, description, location, name, phone);
     }
 
-    private void setLoading(boolean loading) {
-        btnSubmit.setEnabled(!loading);
-        btnSubmit.setText(loading ? "Mengirim..." : getString(R.string.submit));
+    private void simulateSubmission(String itemName, String description, String location, String name, String phone) {
+        // Simulate network delay
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000); // 2 second delay to simulate network call
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // Return to main thread for UI updates
+            runOnUiThread(() -> {
+                btnSubmit.setEnabled(true);
+                btnSubmit.setText("Kirim Laporan");
+
+                // Show success message
+                String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
+                Toast.makeText(AddReportActivity.this,
+                    "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
+                    Toast.LENGTH_LONG).show();
+
+                // Close activity and return to main
+                setResult(RESULT_OK);
+                finish();
+            });
+        }).start();
     }
 }

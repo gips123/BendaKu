@@ -6,32 +6,6 @@
     android:orientation="vertical"
     android:background="@android:color/white">
 
-    <!-- Search Bar -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Widget.Material3.TextInputLayout.FilledBox"
-            android:hint="Cari barang..."
-            app:boxBackgroundColor="@android:color/transparent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etSearch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
-                android:maxLines="1" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
     <!-- Filter Chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -51,47 +25,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Semua"
-                android:checkable="true"
-                android:checked="true"
-                style="@style/Widget.Material3.Chip.Filter" />
+                app:chipIcon="@android:drawable/ic_menu_view" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chipElektronik"
+                android:id="@+id/chipToday"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📱 Elektronik"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
+                android:text="Hari Ini"
+                app:chipIcon="@android:drawable/ic_menu_today" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chipPakaian"
+                android:id="@+id/chipThisWeek"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="👕 Pakaian"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAksesoris"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💎 Aksesoris"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipDokumen"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📄 Dokumen"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
+                android:text="Minggu Ini"
+                app:chipIcon="@android:drawable/ic_menu_week" />
 
         </com.google.android.material.chip.ChipGroup>
 
     </HorizontalScrollView>
 
-    <!-- Content Section -->
+    <!-- SwipeRefreshLayout -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
@@ -101,36 +55,32 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <!-- RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="8dp"
                 android:clipToPadding="false"
+                android:paddingBottom="16dp"
                 android:scrollbars="vertical" />
 
             <!-- Empty State -->
             <LinearLayout
                 android:id="@+id/emptyState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center"
+                android:padding="32dp"
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/tvEmpty"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Belum ada barang"
-                    android:textSize="18sp"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Laporan barang akan muncul di sini"
-                    android:textSize="14sp"
+                    android:text="Tidak ada barang ditemukan"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_secondary"
                     android:gravity="center" />
 
             </LinearLayout>
@@ -138,11 +88,11 @@
             <!-- Loading State -->
             <LinearLayout
                 android:id="@+id/loadingState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:gravity="center"
+                android:padding="32dp"
                 android:visibility="gone">
 
                 <ProgressBar
@@ -153,8 +103,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Memuat data..."
-                    android:textSize="16sp" />
+                    android:text="Memuat..."
+                    android:textSize="16sp"
+                    android:textColor="@color/text_secondary" />
 
             </LinearLayout>
 

@@ -7,13 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.bendaku.model.Item;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,59 +60,149 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView ivItemImage;
         private TextView tvItemName;
-        private TextView tvItemDescription;
-        private TextView tvItemLocation;
-        private TextView tvItemDate;
-        private TextView tvItemType;
+        private TextView tvDescription;
+        private TextView tvLocation;
+        private TextView tvDate;
+        private TextView tvStatus;
+        private TextView tvCategoryIcon;
+        private MaterialCardView statusBadge;
+        private MaterialButton btnContact;
+        private MaterialButton btnDetail;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            // Initialize views with correct IDs from new layout
             ivItemImage = itemView.findViewById(R.id.ivItemImage);
             tvItemName = itemView.findViewById(R.id.tvItemName);
-            tvItemDescription = itemView.findViewById(R.id.tvItemDescription);
-            tvItemLocation = itemView.findViewById(R.id.tvItemLocation);
-            tvItemDate = itemView.findViewById(R.id.tvItemDate);
-            tvItemType = itemView.findViewById(R.id.tvItemType);
+            tvDescription = itemView.findViewById(R.id.tvDescription);
+            tvLocation = itemView.findViewById(R.id.tvLocation);
+            tvDate = itemView.findViewById(R.id.tvDate);
+            tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvCategoryIcon = itemView.findViewById(R.id.tvCategoryIcon);
+            statusBadge = itemView.findViewById(R.id.statusBadge);
+            btnContact = itemView.findViewById(R.id.btnContact);
+            btnDetail = itemView.findViewById(R.id.btnDetail);
         }
 
         public void bind(Item item, OnItemClickListener listener) {
+            // Set basic item data
             tvItemName.setText(item.getName());
-            tvItemDescription.setText(item.getDescription());
-            tvItemLocation.setText(item.getLocation());
+            tvDescription.setText(item.getDescription());
+            tvLocation.setText(item.getLocation());
 
-            // Format date
+            // Format and set date
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-                tvItemDate.setText(item.getDateTime());
+                tvDate.setText(getRelativeTimeString(item.getDateTime()));
             } catch (Exception e) {
-                tvItemDate.setText(item.getDateTime());
+                tvDate.setText(item.getDateTime());
             }
 
-            // Set type with color
+            // Set status badge with appropriate colors
             if ("lost".equals(item.getType())) {
-                tvItemType.setText("HILANG");
-                tvItemType.setBackgroundColor(itemView.getContext().getColor(android.R.color.holo_red_dark));
+                tvStatus.setText("HILANG");
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.error));
+                tvCategoryIcon.setText(getCategoryIcon(item.getName(), "lost"));
             } else {
-                tvItemType.setText("DITEMUKAN");
-                tvItemType.setBackgroundColor(itemView.getContext().getColor(android.R.color.holo_green_dark));
+                tvStatus.setText("DITEMUKAN");
+                statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.success));
+                tvCategoryIcon.setText(getCategoryIcon(item.getName(), "found"));
             }
 
-            // Load image with Glide
+            // Load image with proper drawable handling
             if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
-                Glide.with(itemView.getContext())
-                        .load(item.getImageUrl())
-                        .placeholder(android.R.drawable.ic_menu_gallery)
-                        .error(android.R.drawable.ic_menu_gallery)
-                        .into(ivItemImage);
+                if (item.getImageUrl().startsWith("drawable://")) {
+                    // Handle local drawable images
+                    String drawableName = item.getImageUrl().replace("drawable://", "");
+                    int drawableId = getDrawableResourceId(drawableName);
+                    if (drawableId != 0) {
+                        Glide.with(itemView.getContext())
+                                .load(drawableId)
+                                .centerCrop()
+                                .placeholder(R.color.surface_variant)
+                                .error(R.color.surface_variant)
+                                .into(ivItemImage);
+                    } else {
+                        ivItemImage.setImageResource(R.color.surface_variant);
+                    }
+                } else {
+                    // Handle URL images
+                    Glide.with(itemView.getContext())
+                            .load(item.getImageUrl())
+                            .centerCrop()
+                            .placeholder(R.color.surface_variant)
+                            .error(R.color.surface_variant)
+                            .into(ivItemImage);
+                }
             } else {
-                ivItemImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                ivItemImage.setImageResource(R.color.surface_variant);
             }
 
+            // Set button click listeners
+            btnContact.setOnClickListener(v -> {
+                // Handle contact functionality
+                if (listener != null) {
+                    // You can implement contact logic here
+                }
+            });
+
+            btnDetail.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(item);
+                }
+            });
+
+            // Set click listener for the whole item
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(item);
                 }
             });
+        }
+
+        private int getDrawableResourceId(String drawableName) {
+            // Map drawable names to resource IDs
+            switch (drawableName) {
+                case "dompet":
+                    return R.drawable.dompet;
+                case "hoodie":
+                    return R.drawable.hoodie;
+                case "kunci":
+                    return R.drawable.kunci;
+                case "powerbank":
+                    return R.drawable.powerbank;
+                case "samsung":
+                    return R.drawable.samsung;
+                case "sus":
+                    return R.drawable.sus;
+                default:
+                    return R.drawable.ic_item; // Default fallback
+            }
+        }
+
+        private String getCategoryIcon(String itemName, String type) {
+            // Return category icons based on item name/type
+            String name = itemName.toLowerCase();
+            if (name.contains("dompet") || name.contains("wallet")) {
+                return "💳";
+            } else if (name.contains("laptop") || name.contains("computer")) {
+                return "💻";
+            } else if (name.contains("kunci") || name.contains("key")) {
+                return "🔑";
+            } else if (name.contains("handphone") || name.contains("phone") || name.contains("samsung")) {
+                return "📱";
+            } else if (name.contains("jaket") || name.contains("hoodie")) {
+                return "👕";
+            } else if (name.contains("powerbank") || name.contains("charger")) {
+                return "🔋";
+            } else {
+                return "📦"; // Default icon
+            }
+        }
+
+        private String getRelativeTimeString(String dateTime) {
+            // Simple relative time formatting
+            return dateTime; // For now, just return the original date
         }
     }
 }

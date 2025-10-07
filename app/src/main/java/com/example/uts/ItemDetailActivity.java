@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.bendaku.api.ApiClient;
@@ -40,7 +41,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         initViews();
         initServices();
         getItemId();
-        loadItemDetail();
+        //loadItemDetail();
         setupClickListeners();
     }
 
@@ -62,36 +63,48 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
 
     private void getItemId() {
-        itemId = getIntent().getStringExtra("item_id");
-        if (itemId == null) {
-            Toast.makeText(this, "Item tidak ditemukan", Toast.LENGTH_SHORT).show();
-            finish();
+        // Try to get the item object first
+        currentItem = (Item) getIntent().getSerializableExtra("item");
+
+        if (currentItem != null) {
+            // We have the item data, display it directly
+            displayItemDetails();
+        } else {
+            // Fallback to old method with item_id for API call
+            itemId = getIntent().getStringExtra("item_id");
+            if (itemId == null) {
+                Toast.makeText(this, "Item tidak ditemukan", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                loadItemDetail();
+            }
         }
     }
 
     private void loadItemDetail() {
-        Call<ApiResponse<Item>> call = apiService.getItem(itemId);
-        call.enqueue(new Callback<ApiResponse<Item>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<Item>> call, Response<ApiResponse<Item>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<Item> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        currentItem = apiResponse.getData();
-                        displayItemDetails();
-                    } else {
-                        showError(apiResponse.getMessage());
-                    }
-                } else {
-                    showError("Gagal memuat detail barang");
-                }
-            }
+        // For now, since we don't have backend API, let's use dummy data
+        // This method is kept for future API integration
+        Toast.makeText(this, "Memuat detail item...", Toast.LENGTH_SHORT).show();
 
-            @Override
-            public void onFailure(Call<ApiResponse<Item>> call, Throwable t) {
-                showError("Error: " + t.getMessage());
-            }
-        });
+        // Simulate loading with dummy data based on itemId
+        // In real implementation, this would be an API call
+        currentItem = createDummyItem();
+        displayItemDetails();
+    }
+
+    private Item createDummyItem() {
+        // Create a dummy item for testing
+        Item item = new Item();
+        item.setId(itemId != null ? itemId : "dummy_id");
+        item.setName("Sample Item");
+        item.setDescription("This is a sample item description for testing.");
+        item.setLocation("Sample Location");
+        item.setDateTime("2024-01-01");
+        item.setType("lost");
+        item.setReporterName("Sample Reporter");
+        item.setReporterPhone("081234567890");
+        item.setImageUrl(""); // Empty for now
+        return item;
     }
 
     private void displayItemDetails() {
@@ -106,21 +119,38 @@ public class ItemDetailActivity extends AppCompatActivity {
         // Set type with color
         if ("lost".equals(currentItem.getType())) {
             tvItemType.setText("HILANG");
-            tvItemType.setBackgroundColor(getColor(android.R.color.holo_red_dark));
+            tvItemType.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
         } else {
             tvItemType.setText("DITEMUKAN");
-            tvItemType.setBackgroundColor(getColor(android.R.color.holo_green_dark));
+            tvItemType.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
         }
 
         // Load image
         if (currentItem.getImageUrl() != null && !currentItem.getImageUrl().isEmpty()) {
-            Glide.with(this)
-                    .load(currentItem.getImageUrl())
-                    .placeholder(android.R.drawable.ic_menu_gallery)
-                    .error(android.R.drawable.ic_menu_gallery)
-                    .into(ivItemImage);
+            String imageUrl = currentItem.getImageUrl();
+
+            // Check if it's a drawable resource reference
+            if (imageUrl.startsWith("drawable://")) {
+                String drawableName = imageUrl.replace("drawable://", "");
+                int drawableResId = getDrawableResourceId(drawableName);
+
+                if (drawableResId != 0) {
+                    ivItemImage.setImageResource(drawableResId);
+                } else {
+                    // Fallback to default image
+                    ivItemImage.setImageResource(R.drawable.ic_item);
+                }
+            } else {
+                // Load from URL using Glide (for future API integration)
+                Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_item)
+                        .error(R.drawable.ic_item)
+                        .into(ivItemImage);
+            }
         } else {
-            ivItemImage.setImageResource(android.R.drawable.ic_menu_gallery);
+            // Default image when no image is available
+            ivItemImage.setImageResource(R.drawable.ic_item);
         }
 
         // Hide claim button if user is the reporter
@@ -152,5 +182,25 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private int getDrawableResourceId(String drawableName) {
+        // Map drawable names to resource IDs
+        switch (drawableName) {
+            case "dompet":
+                return R.drawable.dompet;
+            case "hoodie":
+                return R.drawable.hoodie;
+            case "kunci":
+                return R.drawable.kunci;
+            case "powerbank":
+                return R.drawable.powerbank;
+            case "samsung":
+                return R.drawable.samsung;
+            case "sus":
+                return R.drawable.sus;
+            default:
+                return R.drawable.ic_item; // Default fallback
+        }
     }
 }
