@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,7 +35,8 @@ public class ItemListFragment extends Fragment {
     private String itemType;
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerView;
-    private TextView tvEmpty;
+    private LinearLayout emptyState;
+    private LinearLayout loadingState;
     private ItemAdapter adapter;
     private ApiService apiService;
 
@@ -72,7 +73,8 @@ public class ItemListFragment extends Fragment {
     private void initViews(View view) {
         swipeRefresh = view.findViewById(R.id.swipeRefresh);
         recyclerView = view.findViewById(R.id.recyclerView);
-        tvEmpty = view.findViewById(R.id.tvEmpty);
+        emptyState = view.findViewById(R.id.emptyState);
+        loadingState = view.findViewById(R.id.loadingState);
     }
 
     private void setupRecyclerView() {
@@ -86,6 +88,7 @@ public class ItemListFragment extends Fragment {
     }
 
     private void loadItems() {
+        showLoading();
         swipeRefresh.setRefreshing(true);
 
         // Menggunakan dummy data untuk testing (tanpa backend)
@@ -94,35 +97,13 @@ public class ItemListFragment extends Fragment {
             ApiResponse<List<Item>> response = DummyDataHelper.simulateGetItems(itemType);
 
             // Kembali ke main thread untuk update UI
-            getActivity().runOnUiThread(() -> {
-                swipeRefresh.setRefreshing(false);
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    swipeRefresh.setRefreshing(false);
+                    hideLoading();
 
-                if (response.isSuccess()) {
-                    List<Item> items = response.getData();
-                    if (items != null && !items.isEmpty()) {
-                        adapter.updateItems(items);
-                        showContent();
-                    } else {
-                        showEmpty();
-                    }
-                } else {
-                    showError(response.getMessage());
-                }
-            });
-        }).start();
-
-        // Original API call code (commented out until backend is ready)
-        /*
-        Call<ApiResponse<List<Item>>> call = apiService.getItems(itemType);
-        call.enqueue(new Callback<ApiResponse<List<Item>>>() {
-            @Override
-            public void onResponse(Call<ApiResponse<List<Item>>> call, Response<ApiResponse<List<Item>>> response) {
-                swipeRefresh.setRefreshing(false);
-
-                if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<List<Item>> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        List<Item> items = apiResponse.getData();
+                    if (response.isSuccess()) {
+                        List<Item> items = response.getData();
                         if (items != null && !items.isEmpty()) {
                             adapter.updateItems(items);
                             showContent();
@@ -130,45 +111,45 @@ public class ItemListFragment extends Fragment {
                             showEmpty();
                         }
                     } else {
-                        showError(apiResponse.getMessage());
+                        showError(response.getMessage());
                     }
-                } else {
-                    showError("Gagal memuat data");
-                }
+                });
             }
+        }).start();
+    }
 
-            @Override
-            public void onFailure(Call<ApiResponse<List<Item>>> call, Throwable t) {
-                swipeRefresh.setRefreshing(false);
-                showError("Error: " + t.getMessage());
-            }
-        });
-        */
+    private void showContent() {
+        recyclerView.setVisibility(View.VISIBLE);
+        emptyState.setVisibility(View.GONE);
+        loadingState.setVisibility(View.GONE);
+    }
+
+    private void showEmpty() {
+        recyclerView.setVisibility(View.GONE);
+        emptyState.setVisibility(View.VISIBLE);
+        loadingState.setVisibility(View.GONE);
+    }
+
+    private void showLoading() {
+        recyclerView.setVisibility(View.GONE);
+        emptyState.setVisibility(View.GONE);
+        loadingState.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoading() {
+        loadingState.setVisibility(View.GONE);
+    }
+
+    private void showError(String message) {
+        showEmpty(); // Show empty state for errors
+        if (getContext() != null) {
+            Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void onItemClick(Item item) {
         Intent intent = new Intent(getContext(), ItemDetailActivity.class);
         intent.putExtra("item_id", item.getId());
         startActivity(intent);
-    }
-
-    private void showContent() {
-        recyclerView.setVisibility(View.VISIBLE);
-        tvEmpty.setVisibility(View.GONE);
-    }
-
-    private void showEmpty() {
-        recyclerView.setVisibility(View.GONE);
-        tvEmpty.setVisibility(View.VISIBLE);
-    }
-
-    private void showError(String message) {
-        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        loadItems();
     }
 }

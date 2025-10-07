@@ -23,9 +23,9 @@ import retrofit2.Response;
 public class ItemDetailActivity extends AppCompatActivity {
 
     private ImageView ivItemImage;
-    private TextView tvItemType, tvItemName, tvItemDescription, tvItemLocation, tvItemDateTime;
-    private TextView tvReporterName, tvReporterPhone;
-    private MaterialButton btnClaimItem;
+    private TextView tvItemType, tvItemName, tvItemDescription, tvItemLocation, tvItemDate;
+    private TextView tvReporter;
+    private MaterialButton btnClaim, btnContact;
 
     private String itemId;
     private Item currentItem;
@@ -50,10 +50,10 @@ public class ItemDetailActivity extends AppCompatActivity {
         tvItemName = findViewById(R.id.tvItemName);
         tvItemDescription = findViewById(R.id.tvItemDescription);
         tvItemLocation = findViewById(R.id.tvItemLocation);
-        tvItemDateTime = findViewById(R.id.tvItemDateTime);
-        tvReporterName = findViewById(R.id.tvReporterName);
-        tvReporterPhone = findViewById(R.id.tvReporterPhone);
-        btnClaimItem = findViewById(R.id.btnClaimItem);
+        tvItemDate = findViewById(R.id.tvItemDate);
+        tvReporter = findViewById(R.id.tvReporter);
+        btnClaim = findViewById(R.id.btnClaim);
+        btnContact = findViewById(R.id.btnContact);
     }
 
     private void initServices() {
@@ -100,16 +100,15 @@ public class ItemDetailActivity extends AppCompatActivity {
         tvItemName.setText(currentItem.getName());
         tvItemDescription.setText(currentItem.getDescription());
         tvItemLocation.setText(currentItem.getLocation());
-        tvItemDateTime.setText(currentItem.getDateTime());
-        tvReporterName.setText(currentItem.getReporterName());
-        tvReporterPhone.setText(currentItem.getReporterPhone());
+        tvItemDate.setText(currentItem.getDateTime());
+        tvReporter.setText(currentItem.getReporterName());
 
         // Set type with color
         if ("lost".equals(currentItem.getType())) {
-            tvItemType.setText("BARANG HILANG");
+            tvItemType.setText("HILANG");
             tvItemType.setBackgroundColor(getColor(android.R.color.holo_red_dark));
         } else {
-            tvItemType.setText("BARANG DITEMUKAN");
+            tvItemType.setText("DITEMUKAN");
             tvItemType.setBackgroundColor(getColor(android.R.color.holo_green_dark));
         }
 
@@ -126,17 +125,26 @@ public class ItemDetailActivity extends AppCompatActivity {
 
         // Hide claim button if user is the reporter
         if (sessionManager.getUser().getId().equals(currentItem.getReporterId())) {
-            btnClaimItem.setText("Ini adalah laporan Anda");
-            btnClaimItem.setEnabled(false);
+            btnClaim.setText("Ini adalah laporan Anda");
+            btnClaim.setEnabled(false);
         }
     }
 
     private void setupClickListeners() {
-        btnClaimItem.setOnClickListener(v -> {
+        btnClaim.setOnClickListener(v -> {
             if (currentItem != null) {
                 Intent intent = new Intent(this, ClaimFormActivity.class);
                 intent.putExtra("item_id", currentItem.getId());
                 intent.putExtra("item_name", currentItem.getName());
+                startActivity(intent);
+            }
+        });
+
+        btnContact.setOnClickListener(v -> {
+            if (currentItem != null && currentItem.getReporterPhone() != null) {
+                // Open WhatsApp or phone dialer
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(android.net.Uri.parse("https://wa.me/" + currentItem.getReporterPhone()));
                 startActivity(intent);
             }
         });

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -10,86 +9,22 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="4dp">
+        android:layout_margin="16dp">
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/Widget.Material3.TextInputLayout.FilledBox"
-            android:hint="Cari barang..."
-            app:boxBackgroundColor="@android:color/transparent">
+            android:hint="Search items...">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:imeOptions="actionSearch"
                 android:maxLines="1" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
     </com.google.android.material.card.MaterialCardView>
-
-    <!-- Filter Chips -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:scrollbars="none">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="16dp"
-            app:singleSelection="false">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Semua"
-                android:checkable="true"
-                android:checked="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipElektronik"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📱 Elektronik"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPakaian"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👕 Pakaian"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAksesoris"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="💎 Aksesoris"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipDokumen"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📄 Dokumen"
-                android:checkable="true"
-                style="@style/Widget.Material3.Chip.Filter" />
-
-        </com.google.android.material.chip.ChipGroup>
-
-    </HorizontalScrollView>
 
     <!-- Content Section -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -105,9 +40,7 @@
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="8dp"
-                android:clipToPadding="false"
-                android:scrollbars="vertical" />
+                android:padding="8dp" />
 
             <!-- Empty State -->
             <LinearLayout
@@ -122,14 +55,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Belum ada barang"
+                    android:text="No items found"
                     android:textSize="18sp"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Laporan barang akan muncul di sini"
+                    android:text="Reports will appear here"
                     android:textSize="14sp"
                     android:gravity="center" />
 
@@ -153,7 +86,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Memuat data..."
+                    android:text="Loading..."
                     android:textSize="16sp" />
 
             </LinearLayout>

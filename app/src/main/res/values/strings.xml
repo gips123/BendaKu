@@ -11,12 +11,23 @@
     <string name="student_id">NIM/NIP</string>
     <string name="confirm_password">Konfirmasi Password</string>
     <string name="email_validation">Gunakan email @upnvj.ac.id</string>
+    <string name="forgot_password">Lupa Password?</string>
+    <string name="login_title">Masuk ke Akun Anda</string>
+    <string name="register_title">Buat Akun Baru</string>
+    <string name="no_account">Belum punya akun?</string>
+    <string name="register_here">Daftar di sini</string>
+    <string name="have_account">Sudah punya akun?</string>
+    <string name="login_here">Masuk di sini</string>
 
     <!-- Main -->
     <string name="lost_items">Barang Hilang</string>
     <string name="found_items">Barang Ditemukan</string>
     <string name="add_report">Tambah Laporan</string>
     <string name="search">Cari barang...</string>
+    <string name="no_items_found">Belum ada laporan</string>
+    <string name="welcome_back">Selamat datang kembali</string>
+    <string name="total_reports">Total Laporan</string>
+    <string name="recent_activity">Aktivitas Terbaru</string>
 
     <!-- Add Report -->
     <string name="report_lost">Laporkan Barang Hilang</string>
@@ -27,28 +38,93 @@
     <string name="date_time">Tanggal &amp; Waktu</string>
     <string name="upload_photo">Upload Foto</string>
     <string name="submit">Kirim</string>
+    <string name="report_title">Laporkan Barang</string>
+    <string name="report_subtitle">Bantu temukan barang hilang atau laporkan barang temuan</string>
+    <string name="item_details">Detail Barang</string>
+    <string name="contact_info">Informasi Kontak</string>
+    <string name="category">Kategori Barang</string>
+    <string name="whatsapp_number">Nomor WhatsApp</string>
+    <string name="submit_report">📝 Kirim Laporan</string>
+    <string name="photo_hint">Tambah Foto Barang</string>
+    <string name="photo_subtitle">Ketuk untuk memilih foto</string>
 
     <!-- Item Details -->
-    <string name="claim_item">Klaim Barang Ini</string>
-    <string name="reported_by">Dilaporkan oleh</string>
-    <string name="contact_info">Info Kontak</string>
+    <string name="item_details_title">Detail Barang</string>
+    <string name="contact_owner">Hubungi Pemilik</string>
+    <string name="claim_item">Klaim Barang</string>
+    <string name="report_date">Tanggal Laporan</string>
+    <string name="status">Status</string>
+    <string name="reporter">Pelapor</string>
+    <string name="share_item">Bagikan</string>
+
+    <!-- Categories -->
+    <string name="category_electronics">📱 Elektronik</string>
+    <string name="category_clothing">👕 Pakaian</string>
+    <string name="category_accessories">💎 Aksesoris</string>
+    <string name="category_documents">📄 Dokumen</string>
+    <string name="category_bags">🎒 Tas</string>
+    <string name="category_books">📚 Buku</string>
+    <string name="category_others">🔧 Lainnya</string>
+
+    <!-- Status -->
+    <string name="status_lost">HILANG</string>
+    <string name="status_found">DITEMUKAN</string>
+    <string name="status_claimed">DIKLAIM</string>
+    <string name="status_returned">DIKEMBALIKAN</string>
+
+    <!-- Admin -->
+    <string name="admin_panel">Panel Admin</string>
+    <string name="manage_reports">Kelola Laporan</string>
+    <string name="manage_users">Kelola Pengguna</string>
+    <string name="statistics">Statistik</string>
+    <string name="pending_claims">Klaim Pending</string>
+
+    <!-- Notifications -->
+    <string name="notifications">Notifikasi</string>
+    <string name="new_item_found">Barang baru ditemukan</string>
+    <string name="item_claimed">Barang telah diklaim</string>
+    <string name="claim_approved">Klaim disetujui</string>
+    <string name="mark_as_read">Tandai sudah dibaca</string>
+
+    <!-- General -->
+    <string name="loading">Memuat...</string>
+    <string name="error">Terjadi kesalahan</string>
+    <string name="success">Berhasil</string>
+    <string name="retry">Coba Lagi</string>
+    <string name="cancel">Batal</string>
+    <string name="confirm">Konfirmasi</string>
+    <string name="save">Simpan</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Hapus</string>
+    <string name="logout">Keluar</string>
+    <string name="profile">Profil</string>
+    <string name="settings">Pengaturan</string>
+    <string name="about">Tentang</string>
+    <string name="help">Bantuan</string>
+
+    <!-- Messages -->
+    <string name="report_submitted">Laporan berhasil dikirim</string>
+    <string name="report_success">Laporan berhasil dikirim</string>
+    <string name="claim_submitted">Klaim berhasil dikirim</string>
+    <string name="claim_success">Klaim berhasil dikirim</string>
+    <string name="login_success">Login berhasil</string>
+    <string name="logout_success">Logout berhasil</string>
+    <string name="network_error">Periksa koneksi internet Anda</string>
+    <string name="empty_field">Field tidak boleh kosong</string>
+    <string name="invalid_email">Email tidak valid</string>
+    <string name="password_mismatch">Password tidak cocok</string>
+
+    <!-- About -->
+    <string name="app_version">Versi Aplikasi</string>
+    <string name="app_description">BendaKu adalah aplikasi Lost &amp; Found untuk komunitas UPNVJ yang membantu mahasiswa dan staff menemukan barang hilang mereka.</string>
+    <string name="developed_by">Dikembangkan oleh Tim UPNVJ</string>
 
     <!-- Claim Form -->
-    <string name="claim_form">Form Klaim</string>
+    <string name="claim_form">Form Klaim Barang</string>
     <string name="proof_photo">Foto Bukti</string>
     <string name="claim_description">Deskripsi Klaim</string>
     <string name="submit_claim">Kirim Klaim</string>
-
-    <!-- Admin Panel -->
-    <string name="admin_panel">Panel Admin</string>
-    <string name="pending_claims">Klaim Menunggu Verifikasi</string>
-    <string name="approve">Setujui</string>
     <string name="reject">Tolak</string>
+    <string name="approve">Setujui</string>
 
-    <!-- Messages -->
-    <string name="no_items_found">Belum ada barang yang dilaporkan</string>
-    <string name="login_required">Silakan login terlebih dahulu</string>
-    <string name="report_success">Laporan berhasil dikirim</string>
-    <string name="claim_success">Klaim berhasil dikirim</string>
-    <string name="error_occurred">Terjadi kesalahan</string>
 </resources>

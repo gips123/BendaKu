@@ -39,7 +39,7 @@ public class AddReportActivity extends AppCompatActivity {
 
     private MaterialButton btnLost, btnFound, btnSubmit;
     private ImageView ivPreview;
-    private TextView tvImageHint;
+    private View uploadPlaceholder;
     private TextInputEditText etItemName, etDescription, etLocation, etDateTime;
 
     private String reportType = "lost";
@@ -64,7 +64,7 @@ public class AddReportActivity extends AppCompatActivity {
         btnFound = findViewById(R.id.btnFound);
         btnSubmit = findViewById(R.id.btnSubmit);
         ivPreview = findViewById(R.id.ivPreview);
-        tvImageHint = findViewById(R.id.tvImageHint);
+        uploadPlaceholder = findViewById(R.id.uploadPlaceholder);
         etItemName = findViewById(R.id.etItemName);
         etDescription = findViewById(R.id.etDescription);
         etLocation = findViewById(R.id.etLocation);
@@ -116,7 +116,7 @@ public class AddReportActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && data != null) {
             selectedImageUri = data.getData();
             ivPreview.setImageURI(selectedImageUri);
-            tvImageHint.setVisibility(View.GONE);
+            uploadPlaceholder.setVisibility(View.GONE);
         }
     }
 
