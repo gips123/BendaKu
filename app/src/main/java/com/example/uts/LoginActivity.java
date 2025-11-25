@@ -11,10 +11,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
 import com.example.bendaku.api.ApiService;
-import com.example.bendaku.model.ApiResponse;
+import com.example.bendaku.model.StrapiAuthResponse;
 import com.example.bendaku.model.User;
 import com.example.bendaku.utils.SessionManager;
-import com.example.bendaku.utils.DummyDataHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -47,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initServices() {
+        ApiClient.init(this);
         sessionManager = new SessionManager(this);
         apiService = ApiClient.getApiService();
     }
@@ -76,57 +76,66 @@ public class LoginActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Menggunakan dummy data untuk testing (tanpa backend)
-        // Jalankan di background thread untuk simulasi network call
-        new Thread(() -> {
-            ApiResponse<User> response = DummyDataHelper.simulateLogin(email, password);
-
-            // Kembali ke main thread untuk update UI
-            runOnUiThread(() -> {
-                setLoading(false);
-
-                if (response.isSuccess()) {
-                    sessionManager.createSession(response.getData());
-                    Toast.makeText(LoginActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
-                } else {
-                    Toast.makeText(LoginActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }).start();
-
-        // Original API call code (commented out until backend is ready)
-        /*
+        // Strapi login API call
         ApiService.LoginRequest request = new ApiService.LoginRequest(email, password);
-        Call<ApiResponse<User>> call = apiService.login(request);
+        Call<StrapiAuthResponse> call = apiService.login(request);
 
-        call.enqueue(new Callback<ApiResponse<User>>() {
+        call.enqueue(new Callback<StrapiAuthResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(Call<StrapiAuthResponse> call, Response<StrapiAuthResponse> response) {
                 setLoading(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<User> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        sessionManager.createSession(apiResponse.getData());
+                    StrapiAuthResponse authResponse = response.body();
+                    if (authResponse.isSuccess()) {
+                        // Save JWT token and user info
+                        String jwt = authResponse.getJwt();
+                        Integer userId = authResponse.getUser() != null ? authResponse.getUser().getId() : null;
+                        sessionManager.saveJwtToken(jwt, userId);
+
+                        // Create User object and save to session
+                        User user = new User();
+                        if (authResponse.getUser() != null) {
+                            user.setId(String.valueOf(authResponse.getUser().getId()));
+                            user.setEmail(authResponse.getUser().getEmail());
+                            user.setFullName(authResponse.getUser().getUsername());
+                        }
+                        sessionManager.createSession(user);
+
+                        Toast.makeText(LoginActivity.this, "Login berhasil", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        String errorMsg = authResponse.getError() != null 
+                                ? authResponse.getError().getMessage() 
+                                : "Login gagal";
+                        Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Login gagal", Toast.LENGTH_SHORT).show();
+                    // Handle HTTP error response
+                    String errorMsg = "Login gagal";
+                    if (response.errorBody() != null) {
+                        try {
+                            // Try to parse error message from response
+                            errorMsg = "Error: " + response.code();
+                        } catch (Exception e) {
+                            errorMsg = "Login gagal. Silakan coba lagi.";
+                        }
+                    }
+                    Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(Call<StrapiAuthResponse> call, Throwable t) {
                 setLoading(false);
-                Toast.makeText(LoginActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                String errorMsg = "Koneksi gagal: " + t.getMessage();
+                if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
+                    errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan di http://localhost:1338";
+                }
+                Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_LONG).show();
             }
         });
-        */
     }
 
     private boolean validateInput(String email, String password) {

@@ -16,6 +16,7 @@ public class Item implements Serializable {
     private String reporterName;
     private String reporterPhone;
     private String status; // "active", "claimed", "resolved"
+    private String statusItem; // "open", "claimed", "resolved" (Strapi field)
     private String createdAt;
 
     public Item() {}
@@ -67,6 +68,9 @@ public class Item implements Serializable {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getStatusItem() { return statusItem; }
+    public void setStatusItem(String statusItem) { this.statusItem = statusItem; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }

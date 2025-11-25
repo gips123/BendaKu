@@ -8,6 +8,10 @@ public class Claim {
     private String claimerPhone;
     private String description;
     private String proofImageUrl;
+    private Integer imageId; // ID foto bukti
+    private Integer claimerKtmId; // ID foto KTM/identitas
+    private String claimerKtmUrl;
+    private String claimerUsername;
     private String status; // "pending_verification", "approved", "rejected"
     private String createdAt;
     private String adminNotes;
@@ -46,6 +50,18 @@ public class Claim {
 
     public String getProofImageUrl() { return proofImageUrl; }
     public void setProofImageUrl(String proofImageUrl) { this.proofImageUrl = proofImageUrl; }
+
+    public Integer getImageId() { return imageId; }
+    public void setImageId(Integer imageId) { this.imageId = imageId; }
+
+    public Integer getClaimerKtmId() { return claimerKtmId; }
+    public void setClaimerKtmId(Integer claimerKtmId) { this.claimerKtmId = claimerKtmId; }
+
+    public String getClaimerKtmUrl() { return claimerKtmUrl; }
+    public void setClaimerKtmUrl(String claimerKtmUrl) { this.claimerKtmUrl = claimerKtmUrl; }
+
+    public String getClaimerUsername() { return claimerUsername; }
+    public void setClaimerUsername(String claimerUsername) { this.claimerUsername = claimerUsername; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

@@ -17,9 +17,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.bendaku.api.ApiClient;
 import com.example.bendaku.api.ApiService;
-import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Item;
-import com.example.bendaku.utils.DummyDataHelper;
+import com.example.bendaku.model.StrapiItem;
+import com.example.bendaku.model.StrapiResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +56,9 @@ public class ItemListFragment extends Fragment {
         if (getArguments() != null) {
             itemType = getArguments().getString(ARG_TYPE);
         }
+        if (getContext() != null) {
+            ApiClient.init(getContext());
+        }
         apiService = ApiClient.getApiService();
     }
 
@@ -89,37 +92,111 @@ public class ItemListFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(this::loadItems);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh data whenever fragment becomes visible again to capture latest posts
+        loadItems();
+    }
+
     private void loadItems() {
         showLoading();
         swipeRefresh.setRefreshing(true);
 
-        // Menggunakan dummy data untuk testing (tanpa backend)
-        // Jalankan di background thread untuk simulasi network call
-        new Thread(() -> {
-            ApiResponse<List<Item>> response = DummyDataHelper.simulateGetItems(itemType);
+        // Call Strapi API to get items
+        Call<StrapiResponse<List<StrapiItem>>> call;
+        if (itemType != null && !itemType.isEmpty()) {
+            // Get items filtered by type
+            call = apiService.getItemsByType("*", itemType);
+        } else {
+            // Get all items
+            call = apiService.getItems("*");
+        }
 
-            // Kembali ke main thread untuk update UI
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    swipeRefresh.setRefreshing(false);
-                    hideLoading();
+        call.enqueue(new Callback<StrapiResponse<List<StrapiItem>>>() {
+            @Override
+            public void onResponse(Call<StrapiResponse<List<StrapiItem>>> call, Response<StrapiResponse<List<StrapiItem>>> response) {
+                swipeRefresh.setRefreshing(false);
+                hideLoading();
 
-                    if (response.isSuccess()) {
-                        List<Item> items = response.getData();
-                        if (items != null && !items.isEmpty()) {
-                            allItems = new ArrayList<>(items);
-                            // Apply current search if any
-                            performSearch(currentSearchQuery);
-                        } else {
-                            allItems.clear();
-                            showEmpty();
-                        }
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    List<StrapiItem> strapiItems = response.body().getData();
+                    if (strapiItems != null && !strapiItems.isEmpty()) {
+                        List<Item> items = convertStrapiItemsToItems(strapiItems);
+                        List<Item> openItems = filterOpenItems(items);
+                        allItems = new ArrayList<>(openItems);
+                        performSearch(currentSearchQuery);
                     } else {
-                        showError(response.getMessage());
+                        allItems.clear();
+                        showEmpty();
                     }
-                });
+                } else {
+                    String errorMsg = "Gagal memuat data";
+                    if (response.body() != null && response.body().getError() != null) {
+                        errorMsg = response.body().getError().getMessage();
+                    }
+                    showError(errorMsg);
+                }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<StrapiResponse<List<StrapiItem>>> call, Throwable t) {
+                swipeRefresh.setRefreshing(false);
+                hideLoading();
+                String errorMsg = "Error: " + t.getMessage();
+                if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
+                    errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan.";
+                }
+                showError(errorMsg);
+            }
+        });
+    }
+
+    private List<Item> convertStrapiItemsToItems(List<StrapiItem> strapiItems) {
+        List<Item> items = new ArrayList<>();
+        for (StrapiItem strapiItem : strapiItems) {
+            if (strapiItem == null) continue;
+            
+            Item item = new Item();
+            item.setId(strapiItem.getId() != null ? String.valueOf(strapiItem.getId()) : "");
+            item.setName(strapiItem.getName() != null ? strapiItem.getName() : "");
+            item.setDescription(strapiItem.getDescription() != null ? strapiItem.getDescription() : "");
+            item.setLocation(strapiItem.getLocation() != null ? strapiItem.getLocation() : "");
+            item.setDateTime(strapiItem.getDateTime() != null ? strapiItem.getDateTime() : "");
+            item.setType(strapiItem.getType() != null ? strapiItem.getType() : "lost");
+            item.setStatusItem(strapiItem.getStatusItem() != null ? strapiItem.getStatusItem() : "open");
+            item.setReporterName(strapiItem.getReporterName() != null ? strapiItem.getReporterName() : "");
+            item.setReporterPhone(strapiItem.getReporterPhone() != null ? strapiItem.getReporterPhone() : "");
+            
+            // Handle image URL - Strapi returns relative URL, need to prepend base URL
+            String imageUrl = strapiItem.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                // If URL doesn't start with http, prepend base URL
+                if (!imageUrl.startsWith("http")) {
+                    // Remove leading slash if present
+                    if (imageUrl.startsWith("/")) {
+                        imageUrl = imageUrl.substring(1);
+                    }
+                    imageUrl = "http://10.0.2.2:1338/" + imageUrl;
+                }
+            }
+            item.setImageUrl(imageUrl);
+            
+            item.setCreatedAt(strapiItem.getCreatedAt() != null ? strapiItem.getCreatedAt() : "");
+            items.add(item);
+        }
+        return items;
+    }
+
+    private List<Item> filterOpenItems(List<Item> items) {
+        List<Item> filtered = new ArrayList<>();
+        for (Item item : items) {
+            String statusItem = item.getStatusItem();
+            if (statusItem == null || statusItem.isEmpty() || "open".equalsIgnoreCase(statusItem)) {
+                filtered.add(item);
+            }
+        }
+        return filtered;
     }
 
     // Add the missing performSearch method

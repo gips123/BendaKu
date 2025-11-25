@@ -14,8 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
 import com.example.bendaku.api.ApiService;
-import com.example.bendaku.model.ApiResponse;
-import com.example.bendaku.model.Item;
+import com.example.bendaku.model.StrapiItem;
+import com.example.bendaku.model.StrapiResponse;
+import com.example.bendaku.model.StrapiUploadResponse;
 import com.example.bendaku.utils.SessionManager;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -23,9 +24,15 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
+import android.database.Cursor;
+import android.provider.OpenableColumns;
+
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import okhttp3.MediaType;
@@ -90,6 +97,7 @@ public class AddReportActivity extends AppCompatActivity {
     }
 
     private void initServices() {
+        ApiClient.init(this);
         sessionManager = new SessionManager(this);
         apiService = ApiClient.getApiService();
     }
@@ -204,34 +212,179 @@ public class AddReportActivity extends AppCompatActivity {
         btnSubmit.setEnabled(false);
         btnSubmit.setText("Mengirim...");
 
-        // Simulate submission without API call (since backend is not ready)
-        simulateSubmission(itemName, description, location, name, phone);
+        // Check if user is logged in
+        if (!sessionManager.isLoggedIn()) {
+            btnSubmit.setEnabled(true);
+            btnSubmit.setText("Kirim Laporan");
+            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Get current date and time in ISO 8601 format
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        String dateTime = sdf.format(calendar.getTime());
+
+        // If image is selected, upload it first, then create item
+        if (selectedImageUri != null) {
+            uploadImageAndCreateItem(itemName, description, location, dateTime, name, phone);
+        } else {
+            // Create item without image
+            createItem(itemName, description, location, dateTime, name, phone, null);
+        }
     }
 
-    private void simulateSubmission(String itemName, String description, String location, String name, String phone) {
-        // Simulate network delay
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000); // 2 second delay to simulate network call
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    private void uploadImageAndCreateItem(String itemName, String description, String location,
+                                         String dateTime, String name, String phone) {
+        try {
+            // Get file name from URI
+            String fileName = "image.jpg";
+            if (selectedImageUri.getScheme().equals("content")) {
+                Cursor cursor = getContentResolver().query(selectedImageUri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex != -1) {
+                        fileName = cursor.getString(nameIndex);
+                    }
+                    cursor.close();
+                }
+            } else if (selectedImageUri.getScheme().equals("file")) {
+                fileName = new File(selectedImageUri.getPath()).getName();
             }
 
-            // Return to main thread for UI updates
-            runOnUiThread(() -> {
+            // Read file from URI
+            InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
+            if (inputStream == null) {
+                btnSubmit.setEnabled(true);
+                btnSubmit.setText("Kirim Laporan");
+                Toast.makeText(this, "Tidak dapat membaca file gambar", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Create temporary file
+            File tempFile = new File(getCacheDir(), fileName);
+            FileOutputStream outputStream = new FileOutputStream(tempFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+            outputStream.close();
+            inputStream.close();
+
+            // Create request body for file
+            RequestBody requestFile = RequestBody.create(
+                    MediaType.parse("image/*"),
+                    tempFile
+            );
+
+            // Create multipart part - Strapi expects "files" as the key
+            MultipartBody.Part filePart = MultipartBody.Part.createFormData("files", fileName, requestFile);
+
+            // Upload file
+            Call<List<StrapiUploadResponse>> uploadCall = apiService.uploadFile(filePart);
+            uploadCall.enqueue(new Callback<List<StrapiUploadResponse>>() {
+                @Override
+                public void onResponse(Call<List<StrapiUploadResponse>> call, Response<List<StrapiUploadResponse>> response) {
+                    // Clean up temp file
+                    if (tempFile.exists()) {
+                        tempFile.delete();
+                    }
+
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        // Get uploaded file ID
+                        StrapiUploadResponse uploadResponse = response.body().get(0);
+                        Integer imageId = uploadResponse.getId();
+
+                        // Create item with image ID
+                        createItem(itemName, description, location, dateTime, name, phone, imageId);
+                    } else {
+                        btnSubmit.setEnabled(true);
+                        btnSubmit.setText("Kirim Laporan");
+                        String errorMsg = "Gagal mengupload gambar";
+                        if (response.code() == 401) {
+                            errorMsg = "Sesi login telah berakhir. Silakan login ulang.";
+                        }
+                        Toast.makeText(AddReportActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<StrapiUploadResponse>> call, Throwable t) {
+                    // Clean up temp file
+                    if (tempFile.exists()) {
+                        tempFile.delete();
+                    }
+
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("Kirim Laporan");
+                    String errorMsg = "Error upload: " + t.getMessage();
+                    if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
+                        errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan.";
+                    }
+                    Toast.makeText(AddReportActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (Exception e) {
+            btnSubmit.setEnabled(true);
+            btnSubmit.setText("Kirim Laporan");
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    private void createItem(String itemName, String description, String location,
+                           String dateTime, String name, String phone, Integer imageId) {
+        // Create item request
+        ApiService.ItemRequest.ItemData itemData = new ApiService.ItemRequest.ItemData(
+                itemName,
+                description,
+                location,
+                dateTime,
+                reportType, // "lost" or "found"
+                "open", // statusItem: "open", "claimed", "resolved"
+                name,
+                phone,
+                imageId // ID dari upload
+        );
+
+        ApiService.ItemRequest request = new ApiService.ItemRequest(itemData);
+
+        Call<StrapiResponse<StrapiItem>> call = apiService.createItem(request);
+        call.enqueue(new Callback<StrapiResponse<StrapiItem>>() {
+            @Override
+            public void onResponse(Call<StrapiResponse<StrapiItem>> call, Response<StrapiResponse<StrapiItem>> response) {
                 btnSubmit.setEnabled(true);
                 btnSubmit.setText("Kirim Laporan");
 
-                // Show success message
-                String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
-                Toast.makeText(AddReportActivity.this,
-                    "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
-                    Toast.LENGTH_LONG).show();
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
+                    Toast.makeText(AddReportActivity.this,
+                            "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
+                            Toast.LENGTH_LONG).show();
 
-                // Close activity and return to main
-                setResult(RESULT_OK);
-                finish();
-            });
-        }).start();
+                    // Close activity and return to main
+                    setResult(RESULT_OK);
+                    finish();
+                } else {
+                    String errorMsg = "Gagal mengirim laporan";
+                    if (response.body() != null && response.body().getError() != null) {
+                        errorMsg = response.body().getError().getMessage();
+                    }
+                    Toast.makeText(AddReportActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StrapiResponse<StrapiItem>> call, Throwable t) {
+                btnSubmit.setEnabled(true);
+                btnSubmit.setText("Kirim Laporan");
+                String errorMsg = "Error: " + t.getMessage();
+                if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
+                    errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan.";
+                }
+                Toast.makeText(AddReportActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }

@@ -85,21 +85,25 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         }
 
         public void bind(Item item, OnItemClickListener listener) {
-            // Set basic item data
-            tvItemName.setText(item.getName());
-            tvDescription.setText(item.getDescription());
-            tvLocation.setText(item.getLocation());
+            // Set basic item data with null safety
+            tvItemName.setText(item.getName() != null ? item.getName() : "");
+            tvDescription.setText(item.getDescription() != null ? item.getDescription() : "");
+            tvLocation.setText(item.getLocation() != null ? item.getLocation() : "");
 
             // Format and set date
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
-                tvDate.setText(getRelativeTimeString(item.getDateTime()));
+                if (item.getDateTime() != null && !item.getDateTime().isEmpty()) {
+                    tvDate.setText(getRelativeTimeString(item.getDateTime()));
+                } else {
+                    tvDate.setText("");
+                }
             } catch (Exception e) {
-                tvDate.setText(item.getDateTime());
+                tvDate.setText(item.getDateTime() != null ? item.getDateTime() : "");
             }
 
             // Set status badge with appropriate colors
-            if ("lost".equals(item.getType())) {
+            String itemType = item.getType() != null ? item.getType() : "lost";
+            if ("lost".equals(itemType)) {
                 tvStatus.setText("HILANG");
                 statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.error));
                 tvCategoryIcon.setText(getCategoryIcon(item.getName(), "lost"));
@@ -182,6 +186,10 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
         private String getCategoryIcon(String itemName, String type) {
             // Return category icons based on item name/type
+            if (itemName == null || itemName.isEmpty()) {
+                return "📦"; // Default icon for null/empty name
+            }
+            
             String name = itemName.toLowerCase();
             if (name.contains("dompet") || name.contains("wallet")) {
                 return "💳";

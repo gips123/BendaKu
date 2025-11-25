@@ -124,6 +124,10 @@
     <string name="proof_photo">Foto Bukti</string>
     <string name="claim_description">Deskripsi Klaim</string>
     <string name="submit_claim">Kirim Klaim</string>
+    <string name="claimer_phone">Nomor Telepon Klaimer</string>
+    <string name="claimer_username">Username Klaimer</string>
+    <string name="claimer_ktm_title">Foto KTM / Identitas</string>
+    <string name="claimer_ktm_hint">Upload foto KTM atau kartu identitas</string>
     <string name="reject">Tolak</string>
     <string name="approve">Setujui</string>
 
