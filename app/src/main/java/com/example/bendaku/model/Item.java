@@ -5,38 +5,42 @@ import java.io.Serializable;
 public class Item implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private int id;
     private String name;
     private String description;
     private String location;
-    private String dateTime;
+    private String dateTime; // Format: "03 Okt 2024, 10:30"
     private String imageUrl;
     private String type; // "lost" or "found"
-    private String reporterId;
+    private String status; // "open", "claimed", "resolved"
+    private Integer reporterId;
     private String reporterName;
     private String reporterPhone;
-    private String status; // "active", "claimed", "resolved"
+    private User reporter;
     private String createdAt;
-
+    private String updatedAt;
+    
     public Item() {}
-
-    public Item(String name, String description, String location, String dateTime,
-                String imageUrl, String type, String reporterId, String reporterName, String reporterPhone) {
+    
+    public Item(int id, String name, String description, String location, String dateTime,
+                String imageUrl, String type, String status, Integer reporterId,
+                String reporterName, String reporterPhone) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.location = location;
         this.dateTime = dateTime;
         this.imageUrl = imageUrl;
         this.type = type;
+        this.status = status;
         this.reporterId = reporterId;
         this.reporterName = reporterName;
         this.reporterPhone = reporterPhone;
-        this.status = "active";
     }
 
     // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -56,8 +60,11 @@ public class Item implements Serializable {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public String getReporterId() { return reporterId; }
-    public void setReporterId(String reporterId) { this.reporterId = reporterId; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public Integer getReporterId() { return reporterId; }
+    public void setReporterId(Integer reporterId) { this.reporterId = reporterId; }
 
     public String getReporterName() { return reporterName; }
     public void setReporterName(String reporterName) { this.reporterName = reporterName; }
@@ -65,9 +72,12 @@ public class Item implements Serializable {
     public String getReporterPhone() { return reporterPhone; }
     public void setReporterPhone(String reporterPhone) { this.reporterPhone = reporterPhone; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public User getReporter() { return reporter; }
+    public void setReporter(User reporter) { this.reporter = reporter; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+
+    public String getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(String updatedAt) { this.updatedAt = updatedAt; }
 }

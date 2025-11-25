@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Item;
 import com.example.bendaku.utils.SessionManager;
@@ -31,7 +31,7 @@ public class ItemDetailActivity extends AppCompatActivity {
     private String itemId;
     private Item currentItem;
     private SessionManager sessionManager;
-    private ApiService apiService;
+    private BendaKuApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +59,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void initServices() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService();
+        apiService = ApiClient.getInstance().getApiService();
     }
 
     private void getItemId() {
@@ -82,29 +82,44 @@ public class ItemDetailActivity extends AppCompatActivity {
     }
 
     private void loadItemDetail() {
-        // For now, since we don't have backend API, let's use dummy data
-        // This method is kept for future API integration
-        Toast.makeText(this, "Memuat detail item...", Toast.LENGTH_SHORT).show();
+        if (itemId == null) {
+            Toast.makeText(this, "Item ID tidak valid", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        // Simulate loading with dummy data based on itemId
-        // In real implementation, this would be an API call
-        currentItem = createDummyItem();
-        displayItemDetails();
-    }
+        try {
+            int id = Integer.parseInt(itemId);
+            Call<ApiResponse<Item>> call = apiService.getItem(id);
+            
+            call.enqueue(new Callback<ApiResponse<Item>>() {
+                @Override
+                public void onResponse(Call<ApiResponse<Item>> call, Response<ApiResponse<Item>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        ApiResponse<Item> apiResponse = response.body();
+                        if (apiResponse.isSuccess() && apiResponse.getData() != null) {
+                            currentItem = apiResponse.getData();
+                            displayItemDetails();
+                        } else {
+                            showError(apiResponse.getMessage());
+                            finish();
+                        }
+                    } else {
+                        showError("Gagal memuat detail item");
+                        finish();
+                    }
+                }
 
-    private Item createDummyItem() {
-        // Create a dummy item for testing
-        Item item = new Item();
-        item.setId(itemId != null ? itemId : "dummy_id");
-        item.setName("Sample Item");
-        item.setDescription("This is a sample item description for testing.");
-        item.setLocation("Sample Location");
-        item.setDateTime("2024-01-01");
-        item.setType("lost");
-        item.setReporterName("Sample Reporter");
-        item.setReporterPhone("081234567890");
-        item.setImageUrl(""); // Empty for now
-        return item;
+                @Override
+                public void onFailure(Call<ApiResponse<Item>> call, Throwable t) {
+                    showError("Error: " + t.getMessage());
+                    finish();
+                }
+            });
+        } catch (NumberFormatException e) {
+            showError("Item ID tidak valid");
+            finish();
+        }
     }
 
     private void displayItemDetails() {
@@ -154,7 +169,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         }
 
         // Hide claim button if user is the reporter
-        if (sessionManager.getUser().getId().equals(currentItem.getReporterId())) {
+        if (currentItem.getReporterId() != null && 
+            sessionManager.getUser().getId() == currentItem.getReporterId()) {
             btnClaim.setText("Ini adalah laporan Anda");
             btnClaim.setEnabled(false);
         }
@@ -164,7 +180,7 @@ public class ItemDetailActivity extends AppCompatActivity {
         btnClaim.setOnClickListener(v -> {
             if (currentItem != null) {
                 Intent intent = new Intent(this, ClaimFormActivity.class);
-                intent.putExtra("item_id", currentItem.getId());
+                intent.putExtra("item_id", String.valueOf(currentItem.getId()));
                 intent.putExtra("item_name", currentItem.getName());
                 startActivity(intent);
             }

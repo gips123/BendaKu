@@ -16,15 +16,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -32,6 +23,21 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+    
+    buildTypes {
+        debug {
+            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:1337/api/\"")
+        }
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            buildConfigField("String", "API_BASE_URL", "\"http://[server-ip]:1337/api/\"")
+        }
     }
 }
 
@@ -57,6 +63,7 @@ dependencies {
     // Networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // Image loading
@@ -70,6 +77,10 @@ dependencies {
 
     // Shared preferences
     implementation("androidx.preference:preference:1.2.1")
+    
+    // ViewModel & LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

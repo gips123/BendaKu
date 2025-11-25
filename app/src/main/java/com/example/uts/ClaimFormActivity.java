@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Claim;
 import com.example.bendaku.utils.SessionManager;
@@ -39,7 +39,7 @@ public class ClaimFormActivity extends AppCompatActivity {
     private String itemId, itemName;
     private Uri selectedProofImageUri;
     private SessionManager sessionManager;
-    private ApiService apiService;
+    private BendaKuApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class ClaimFormActivity extends AppCompatActivity {
 
     private void initServices() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService();
+        apiService = ApiClient.getInstance().getApiService();
     }
 
     private void getIntentData() {
@@ -119,17 +119,37 @@ public class ClaimFormActivity extends AppCompatActivity {
         // Prepare multipart data
         File imageFile = new File(selectedProofImageUri.getPath());
         RequestBody requestFile = RequestBody.create(MediaType.parse("image/*"), imageFile);
-        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("proofImage", imageFile.getName(), requestFile);
+        MultipartBody.Part imagePart = MultipartBody.Part.createFormData("proofImageUrl", imageFile.getName(), requestFile);
 
-        RequestBody itemIdBody = RequestBody.create(MediaType.parse("text/plain"), itemId);
-        RequestBody claimerIdBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getId());
-        RequestBody claimerNameBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getFullName());
-        RequestBody claimerPhoneBody = RequestBody.create(MediaType.parse("text/plain"), sessionManager.getUser().getPhone());
-        RequestBody descriptionBody = RequestBody.create(MediaType.parse("text/plain"), description);
+        // Create JSON data for Strapi format
+        int itemIdInt = Integer.parseInt(itemId);
+        int claimerId = sessionManager.getUser().getId();
+        String claimerName = sessionManager.getUser().getFullName();
+        String claimerPhone = sessionManager.getUser().getPhone();
+        
+        // Build JSON string for data field
+        StringBuilder dataJson = new StringBuilder();
+        dataJson.append("{");
+        dataJson.append("\"itemId\":").append(itemIdInt).append(",");
+        dataJson.append("\"claimerId\":").append(claimerId).append(",");
+        if (claimerName != null) {
+            dataJson.append("\"claimerName\":\"").append(claimerName).append("\",");
+        }
+        if (claimerPhone != null) {
+            dataJson.append("\"claimerPhone\":\"").append(claimerPhone).append("\",");
+        }
+        if (description != null) {
+            dataJson.append("\"description\":\"").append(description.replace("\"", "\\\"")).append("\",");
+        }
+        // Remove trailing comma
+        if (dataJson.charAt(dataJson.length() - 1) == ',') {
+            dataJson.setLength(dataJson.length() - 1);
+        }
+        dataJson.append("}");
+        
+        RequestBody claimDataBody = RequestBody.create(MediaType.parse("application/json"), dataJson.toString());
 
-        Call<ApiResponse<Claim>> call = apiService.createClaim(
-                itemIdBody, claimerIdBody, claimerNameBody, claimerPhoneBody, descriptionBody, imagePart
-        );
+        Call<ApiResponse<Claim>> call = apiService.createClaim(claimDataBody, imagePart);
 
         call.enqueue(new Callback<ApiResponse<Claim>>() {
             @Override

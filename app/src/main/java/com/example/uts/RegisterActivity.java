@@ -9,11 +9,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
+import com.example.bendaku.model.AuthResponse;
 import com.example.bendaku.model.User;
 import com.example.bendaku.utils.SessionManager;
-import com.example.bendaku.utils.DummyDataHelper;
+import com.example.bendaku.utils.TokenManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -26,7 +27,7 @@ public class RegisterActivity extends AppCompatActivity {
     private TextInputEditText etFullName, etEmail, etStudentId, etPhone, etPassword, etConfirmPassword;
     private MaterialButton btnRegister;
     private SessionManager sessionManager;
-    private ApiService apiService;
+    private BendaKuApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void initServices() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService();
+        apiService = ApiClient.getInstance().getApiService();
     }
 
     private void setupClickListeners() {
@@ -75,54 +76,60 @@ public class RegisterActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Menggunakan dummy data untuk testing (tanpa backend)
-        // Jalankan di background thread untuk simulasi network call
-        new Thread(() -> {
-            ApiResponse<User> response = DummyDataHelper.simulateRegister(fullName, email, password, phone, studentId);
+        // Extract username from email (before @)
+        String username = email.split("@")[0];
+        
+        BendaKuApiService.RegisterRequest request = new BendaKuApiService.RegisterRequest(
+            email, password, username, fullName, phone, studentId
+        );
+        Call<AuthResponse> call = apiService.register(request);
 
-            // Kembali ke main thread untuk update UI
-            runOnUiThread(() -> {
-                setLoading(false);
-
-                if (response.isSuccess()) {
-                    Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login dengan password: password123", Toast.LENGTH_LONG).show();
-                    finish();
-                } else {
-                    Toast.makeText(RegisterActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }).start();
-
-        // Original API call code (commented out until backend is ready)
-        /*
-        ApiService.RegisterRequest request = new ApiService.RegisterRequest(fullName, email, password, phone, studentId);
-        Call<ApiResponse<User>> call = apiService.register(request);
-
-        call.enqueue(new Callback<ApiResponse<User>>() {
+        call.enqueue(new Callback<AuthResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(Call<AuthResponse> call, Response<AuthResponse> response) {
                 setLoading(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<User> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
-                        Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_SHORT).show();
-                        finish();
-                    } else {
-                        Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                    AuthResponse authResponse = response.body();
+                    
+                    // Validate auth response
+                    if (authResponse.getJwt() == null || authResponse.getJwt().isEmpty()) {
+                        Toast.makeText(RegisterActivity.this, "Error: JWT token tidak ditemukan", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    
+                    if (authResponse.getUser() == null) {
+                        Toast.makeText(RegisterActivity.this, "Error: User data tidak ditemukan", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    
+                    // Save JWT token
+                    TokenManager.saveToken(authResponse.getJwt());
+                    // Save user session
+                    sessionManager.createSession(authResponse.getUser());
+                    Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_SHORT).show();
+                    finish();
                 } else {
-                    Toast.makeText(RegisterActivity.this, "Registrasi gagal", Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Registrasi gagal";
+                    if (response.code() == 400) {
+                        errorMsg = "Email sudah terdaftar atau data tidak valid";
+                    } else if (response.code() == 500) {
+                        errorMsg = "Server error";
+                    }
+                    Toast.makeText(RegisterActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(Call<AuthResponse> call, Throwable t) {
                 setLoading(false);
-                Toast.makeText(RegisterActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                String errorMsg = "Network error";
+                if (t != null && t.getMessage() != null) {
+                    errorMsg = "Error: " + t.getMessage();
+                }
+                Toast.makeText(RegisterActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
             }
         });
-        */
     }
 
     private boolean validateInput(String fullName, String email, String studentId, String phone, String password, String confirmPassword) {

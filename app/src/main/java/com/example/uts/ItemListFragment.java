@@ -16,10 +16,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Item;
-import com.example.bendaku.utils.DummyDataHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +37,7 @@ public class ItemListFragment extends Fragment {
     private LinearLayout emptyState;
     private LinearLayout loadingState;
     private ItemAdapter adapter;
-    private ApiService apiService;
+    private BendaKuApiService apiService;
     private List<Item> allItems = new ArrayList<>();
     private String currentSearchQuery = "";
 
@@ -56,7 +55,7 @@ public class ItemListFragment extends Fragment {
         if (getArguments() != null) {
             itemType = getArguments().getString(ARG_TYPE);
         }
-        apiService = ApiClient.getApiService();
+        apiService = ApiClient.getInstance().getApiService();
     }
 
     @Nullable
@@ -93,19 +92,17 @@ public class ItemListFragment extends Fragment {
         showLoading();
         swipeRefresh.setRefreshing(true);
 
-        // Menggunakan dummy data untuk testing (tanpa backend)
-        // Jalankan di background thread untuk simulasi network call
-        new Thread(() -> {
-            ApiResponse<List<Item>> response = DummyDataHelper.simulateGetItems(itemType);
+        Call<ApiResponse<List<Item>>> call = apiService.getItems(itemType);
+        call.enqueue(new Callback<ApiResponse<List<Item>>>() {
+            @Override
+            public void onResponse(Call<ApiResponse<List<Item>>> call, Response<ApiResponse<List<Item>>> response) {
+                swipeRefresh.setRefreshing(false);
+                hideLoading();
 
-            // Kembali ke main thread untuk update UI
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    swipeRefresh.setRefreshing(false);
-                    hideLoading();
-
-                    if (response.isSuccess()) {
-                        List<Item> items = response.getData();
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse<List<Item>> apiResponse = response.body();
+                    if (apiResponse.isSuccess()) {
+                        List<Item> items = apiResponse.getData();
                         if (items != null && !items.isEmpty()) {
                             allItems = new ArrayList<>(items);
                             // Apply current search if any
@@ -115,11 +112,20 @@ public class ItemListFragment extends Fragment {
                             showEmpty();
                         }
                     } else {
-                        showError(response.getMessage());
+                        showError(apiResponse.getMessage());
                     }
-                });
+                } else {
+                    showError("Gagal memuat data");
+                }
             }
-        }).start();
+
+            @Override
+            public void onFailure(Call<ApiResponse<List<Item>>> call, Throwable t) {
+                swipeRefresh.setRefreshing(false);
+                hideLoading();
+                showError("Error: " + t.getMessage());
+            }
+        });
     }
 
     // Add the missing performSearch method

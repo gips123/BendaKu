@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Claim;
 import com.example.bendaku.utils.SessionManager;
@@ -28,7 +28,7 @@ public class AdminPanelActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ClaimAdapter adapter;
     private SessionManager sessionManager;
-    private ApiService apiService;
+    private BendaKuApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public class AdminPanelActivity extends AppCompatActivity {
 
     private void initServices() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService();
+        apiService = ApiClient.getInstance().getApiService();
     }
 
     private void checkAdminAccess() {
@@ -86,7 +86,7 @@ public class AdminPanelActivity extends AppCompatActivity {
     private void loadPendingClaims() {
         swipeRefresh.setRefreshing(true);
 
-        Call<ApiResponse<List<Claim>>> call = apiService.getClaims("pending_verification");
+        Call<ApiResponse<List<Claim>>> call = apiService.getClaims("pending");
         call.enqueue(new Callback<ApiResponse<List<Claim>>>() {
             @Override
             public void onResponse(Call<ApiResponse<List<Claim>>> call, Response<ApiResponse<List<Claim>>> response) {
@@ -141,7 +141,7 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void rejectClaim(Claim claim) {
-        ApiService.RejectRequest request = new ApiService.RejectRequest("Klaim ditolak oleh admin");
+        BendaKuApiService.RejectRequest request = new BendaKuApiService.RejectRequest("Klaim ditolak oleh admin");
         Call<ApiResponse<Claim>> call = apiService.rejectClaim(claim.getId(), request);
         call.enqueue(new Callback<ApiResponse<Claim>>() {
             @Override

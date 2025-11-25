@@ -13,9 +13,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
-import com.example.bendaku.api.ApiService;
+import com.example.bendaku.api.BendaKuApiService;
 import com.example.bendaku.model.ApiResponse;
 import com.example.bendaku.model.Item;
+import com.example.bendaku.model.User;
+import com.example.bendaku.repository.ItemRepository;
 import com.example.bendaku.utils.SessionManager;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -24,6 +26,8 @@ import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -46,7 +50,7 @@ public class AddReportActivity extends AppCompatActivity {
     private String reportType = "lost";
     private Uri selectedImageUri;
     private SessionManager sessionManager;
-    private ApiService apiService;
+    private ItemRepository itemRepository;
 
     private ActivityResultLauncher<Intent> imagePickerLauncher;
 
@@ -91,7 +95,7 @@ public class AddReportActivity extends AppCompatActivity {
 
     private void initServices() {
         sessionManager = new SessionManager(this);
-        apiService = ApiClient.getApiService();
+        itemRepository = new ItemRepository();
     }
 
     private void setupImagePicker() {
@@ -204,34 +208,67 @@ public class AddReportActivity extends AppCompatActivity {
         btnSubmit.setEnabled(false);
         btnSubmit.setText("Mengirim...");
 
-        // Simulate submission without API call (since backend is not ready)
-        simulateSubmission(itemName, description, location, name, phone);
-    }
+        // Get current date time
+        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
+        String dateTime = sdf.format(Calendar.getInstance().getTime());
 
-    private void simulateSubmission(String itemName, String description, String location, String name, String phone) {
-        // Simulate network delay
-        new Thread(() -> {
+        // Get user info
+        User currentUser = sessionManager.getUser();
+        Integer reporterId = currentUser != null ? currentUser.getId() : null;
+        String reporterName = name;
+        String reporterPhone = phone;
+
+        // Prepare image file
+        File imageFile = null;
+        if (selectedImageUri != null) {
             try {
-                Thread.sleep(2000); // 2 second delay to simulate network call
-            } catch (InterruptedException e) {
+                // Get file from URI
+                InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
+                if (inputStream != null) {
+                    // Create temporary file
+                    File tempFile = new File(getCacheDir(), "temp_image_" + System.currentTimeMillis() + ".jpg");
+                    FileOutputStream outputStream = new FileOutputStream(tempFile);
+                    
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    
+                    inputStream.close();
+                    outputStream.close();
+                    imageFile = tempFile;
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(this, "Error loading image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        }
 
-            // Return to main thread for UI updates
-            runOnUiThread(() -> {
-                btnSubmit.setEnabled(true);
-                btnSubmit.setText("Kirim Laporan");
+        // Create item via API
+        itemRepository.createItem(itemName, description, location, dateTime, reportType,
+            reporterId, reporterName, reporterPhone, imageFile,
+            new ItemRepository.ItemCallback() {
+                @Override
+                public void onSuccess(Item item) {
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("Kirim Laporan");
+                    
+                    String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
+                    Toast.makeText(AddReportActivity.this,
+                        "Laporan " + reportTypeText + " berhasil dikirim!",
+                        Toast.LENGTH_LONG).show();
 
-                // Show success message
-                String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
-                Toast.makeText(AddReportActivity.this,
-                    "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
-                    Toast.LENGTH_LONG).show();
+                    setResult(RESULT_OK);
+                    finish();
+                }
 
-                // Close activity and return to main
-                setResult(RESULT_OK);
-                finish();
+                @Override
+                public void onError(String error) {
+                    btnSubmit.setEnabled(true);
+                    btnSubmit.setText("Kirim Laporan");
+                    Toast.makeText(AddReportActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                }
             });
-        }).start();
     }
 }

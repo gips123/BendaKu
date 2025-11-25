@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.bendaku.utils.SessionManager;
+import com.example.bendaku.utils.TokenManager;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -16,11 +17,15 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        // Initialize TokenManager for JWT token management
+        TokenManager.init(this);
+        
         sessionManager = new SessionManager(this);
 
         new Handler().postDelayed(() -> {
             Intent intent;
-            if (sessionManager.isLoggedIn()) {
+            // Check both SessionManager and TokenManager for login status
+            if (sessionManager.isLoggedIn() || TokenManager.isLoggedIn()) {
                 intent = new Intent(SplashActivity.this, MainActivity.class);
             } else {
                 intent = new Intent(SplashActivity.this, LoginActivity.class);

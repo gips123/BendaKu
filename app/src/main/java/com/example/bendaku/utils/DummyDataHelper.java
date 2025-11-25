@@ -29,26 +29,25 @@ public class DummyDataHelper {
 
     private static void initializeDummyUsers() {
         // Admin user
-        User admin = new User("Admin BendaKu", "admin@upnvj.ac.id", "081234567890", "ADM001");
-        admin.setId("1");
-        admin.setAdmin(true);
+        User admin = new User(1, "admin@upnvj.ac.id", "admin", "Admin BendaKu", 
+                             "081234567890", "ADM001", true);
         dummyUsers.add(admin);
 
         // Regular users
-        User user1 = new User("Budi Santoso", "budi.santoso@upnvj.ac.id", "081234567891", "2021001");
-        user1.setId("2");
+        User user1 = new User(2, "budi.santoso@upnvj.ac.id", "budi.santoso", 
+                             "Budi Santoso", "081234567891", "2021001", false);
         dummyUsers.add(user1);
 
-        User user2 = new User("Siti Nurhaliza", "siti.nurhaliza@upnvj.ac.id", "081234567892", "2021002");
-        user2.setId("3");
+        User user2 = new User(3, "siti.nurhaliza@upnvj.ac.id", "siti.nurhaliza", 
+                               "Siti Nurhaliza", "081234567892", "2021002", false);
         dummyUsers.add(user2);
 
-        User user3 = new User("Ahmad Fadli", "ahmad.fadli@upnvj.ac.id", "081234567893", "2021003");
-        user3.setId("4");
+        User user3 = new User(4, "ahmad.fadli@upnvj.ac.id", "ahmad.fadli", 
+                             "Ahmad Fadli", "081234567893", "2021003", false);
         dummyUsers.add(user3);
 
-        User user4 = new User("Rina Kartika", "rina.kartika@upnvj.ac.id", "081234567894", "2021004");
-        user4.setId("5");
+        User user4 = new User(5, "rina.kartika@upnvj.ac.id", "rina.kartika", 
+                             "Rina Kartika", "081234567894", "2021004", false);
         dummyUsers.add(user4);
     }
 
@@ -57,54 +56,47 @@ public class DummyDataHelper {
         String currentDate = sdf.format(new Date());
 
         // Lost items
-        Item item1 = new Item("Dompet Kulit Coklat", "Dompet kulit warna coklat berisi KTP dan kartu ATM",
+        Item item1 = new Item(1, "Dompet Kulit Coklat", "Dompet kulit warna coklat berisi KTP dan kartu ATM",
                              "Gedung Rektorat Lt. 2", "03 Okt 2024, 10:30",
-                             "drawable://dompet", "lost", "2", "Budi Santoso", "081234567891");
-        item1.setId("1");
+                             "drawable://dompet", "lost", "open", 2, "Budi Santoso", "081234567891");
         item1.setCreatedAt(currentDate);
         dummyItems.add(item1);
 
-        Item item2 = new Item("Laptop ASUS Vivobook", "Laptop ASUS Vivobook 14 warna silver dengan stiker UPNVJ",
+        Item item2 = new Item(2, "Laptop ASUS Vivobook", "Laptop ASUS Vivobook 14 warna silver dengan stiker UPNVJ",
                              "Perpustakaan Lt. 3", "02 Okt 2024, 14:15",
-                             "drawable://sus", "lost", "3", "Siti Nurhaliza", "081234567892");
-        item2.setId("2");
+                             "drawable://sus", "lost", "open", 3, "Siti Nurhaliza", "081234567892");
         item2.setCreatedAt(currentDate);
         dummyItems.add(item2);
 
-        Item item3 = new Item("Kunci Motor Honda", "Kunci motor Honda Beat warna putih dengan gantungan Hello Kitty",
+        Item item3 = new Item(3, "Kunci Motor Honda", "Kunci motor Honda Beat warna putih dengan gantungan Hello Kitty",
                              "Parkiran Gedung B", "04 Okt 2024, 16:45",
-                             "drawable://kunci", "lost", "4", "Ahmad Fadli", "081234567893");
-        item3.setId("3");
+                             "drawable://kunci", "lost", "open", 4, "Ahmad Fadli", "081234567893");
         item3.setCreatedAt(currentDate);
         dummyItems.add(item3);
 
         // Found items
-        Item item4 = new Item("Handphone Samsung", "Samsung Galaxy A23 warna biru dengan case transparan",
+        Item item4 = new Item(4, "Handphone Samsung", "Samsung Galaxy A23 warna biru dengan case transparan",
                              "Kantin Fakultas Teknik", "05 Okt 2024, 12:20",
-                             "drawable://samsung", "found", "5", "Rina Kartika", "081234567894");
-        item4.setId("4");
+                             "drawable://samsung", "found", "open", 5, "Rina Kartika", "081234567894");
         item4.setCreatedAt(currentDate);
         dummyItems.add(item4);
 
-        Item item5 = new Item("Jaket Hoodie Hitam", "Jaket hoodie warna hitam ukuran L merk Uniqlo",
+        Item item5 = new Item(5, "Jaket Hoodie Hitam", "Jaket hoodie warna hitam ukuran L merk Uniqlo",
                              "Aula Serba Guna", "06 Okt 2024, 09:15",
-                             "drawable://hoodie", "found", "2", "Budi Santoso", "081234567891");
-        item5.setId("5");
+                             "drawable://hoodie", "found", "open", 2, "Budi Santoso", "081234567891");
         item5.setCreatedAt(currentDate);
         dummyItems.add(item5);
 
-        Item item6 = new Item("Powerbank Xiaomi", "Powerbank Xiaomi 10000mAh warna putih dengan kabel micro USB",
+        Item item6 = new Item(6, "Powerbank Xiaomi", "Powerbank Xiaomi 10000mAh warna putih dengan kabel micro USB",
                              "Lab Komputer Gedung C", "07 Okt 2024, 11:30",
-                             "drawable://powerbank", "found", "3", "Siti Nurhaliza", "081234567892");
-        item6.setId("6");
+                             "drawable://powerbank", "found", "open", 3, "Siti Nurhaliza", "081234567892");
         item6.setCreatedAt(currentDate);
         dummyItems.add(item6);
 
         // Add more items using your available images
-        Item item7 = new Item("Tas Hitam Susuk", "Tas hitam dengan desain unik ditemukan di area parkir",
+        Item item7 = new Item(7, "Tas Hitam Susuk", "Tas hitam dengan desain unik ditemukan di area parkir",
                              "Parkiran Gedung A", "08 Okt 2024, 08:45",
-                             "drawable://sus", "found", "6", "Maria Sari", "081234567895");
-        item7.setId("7");
+                             "drawable://sus", "found", "open", 6, "Maria Sari", "081234567895");
         item7.setCreatedAt(currentDate);
         dummyItems.add(item7);
     }
@@ -114,17 +106,15 @@ public class DummyDataHelper {
         String currentDate = sdf.format(new Date());
 
         // Pending claims
-        Claim claim1 = new Claim("4", "2", "Budi Santoso", "081234567891",
+        Claim claim1 = new Claim(1, 4, 2, "Budi Santoso", "081234567891",
                                 "Saya yakin ini HP saya karena ada wallpaper foto keluarga dan aplikasi yang saya install",
-                                "https://via.placeholder.com/300x200?text=Bukti+HP");
-        claim1.setId("1");
+                                "https://via.placeholder.com/300x200?text=Bukti+HP", "pending");
         claim1.setCreatedAt(currentDate);
         dummyClaims.add(claim1);
 
-        Claim claim2 = new Claim("5", "4", "Ahmad Fadli", "081234567893",
+        Claim claim2 = new Claim(2, 5, 4, "Ahmad Fadli", "081234567893",
                                 "Jaket ini milik saya, ada nama saya di label dalam jaket",
-                                "https://via.placeholder.com/300x200?text=Bukti+Jaket");
-        claim2.setId("2");
+                                "https://via.placeholder.com/300x200?text=Bukti+Jaket", "pending");
         claim2.setCreatedAt(currentDate);
         dummyClaims.add(claim2);
     }
@@ -191,8 +181,9 @@ public class DummyDataHelper {
         }
 
         // Create new user
-        User newUser = new User(fullName, email, phone, studentId);
-        newUser.setId(String.valueOf(dummyUsers.size() + 1));
+        int newId = dummyUsers.size() + 1;
+        String username = email.split("@")[0]; // Extract username from email
+        User newUser = new User(newId, email, username, fullName, phone, studentId, false);
         dummyUsers.add(newUser);
 
         response.setSuccess(true);
@@ -239,8 +230,9 @@ public class DummyDataHelper {
         }
 
         Item foundItem = null;
+        int id = Integer.parseInt(itemId);
         for (Item item : dummyItems) {
-            if (item.getId().equals(itemId)) {
+            if (item.getId() == id) {
                 foundItem = item;
                 break;
             }
@@ -297,10 +289,11 @@ public class DummyDataHelper {
             Thread.currentThread().interrupt();
         }
 
-        Item newItem = new Item(name, description, location, dateTime,
+        int newId = dummyItems.size() + 1;
+        Integer reporterIdInt = reporterId != null ? Integer.parseInt(reporterId) : null;
+        Item newItem = new Item(newId, name, description, location, dateTime,
                                "https://via.placeholder.com/300x200?text=New+Item",
-                               type, reporterId, reporterName, reporterPhone);
-        newItem.setId(String.valueOf(dummyItems.size() + 1));
+                               type, "open", reporterIdInt, reporterName, reporterPhone);
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
         newItem.setCreatedAt(sdf.format(new Date()));
 
@@ -325,9 +318,11 @@ public class DummyDataHelper {
             Thread.currentThread().interrupt();
         }
 
-        Claim newClaim = new Claim(itemId, claimerId, claimerName, claimerPhone, description,
-                                  "https://via.placeholder.com/300x200?text=Proof+Image");
-        newClaim.setId(String.valueOf(dummyClaims.size() + 1));
+        int newId = dummyClaims.size() + 1;
+        Integer itemIdInt = itemId != null ? Integer.parseInt(itemId) : null;
+        Integer claimerIdInt = claimerId != null ? Integer.parseInt(claimerId) : null;
+        Claim newClaim = new Claim(newId, itemIdInt, claimerIdInt, claimerName, claimerPhone, description,
+                                  "https://via.placeholder.com/300x200?text=Proof+Image", "pending");
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault());
         newClaim.setCreatedAt(sdf.format(new Date()));
 
@@ -352,8 +347,9 @@ public class DummyDataHelper {
         }
 
         Claim foundClaim = null;
+        int id = Integer.parseInt(claimId);
         for (Claim claim : dummyClaims) {
-            if (claim.getId().equals(claimId)) {
+            if (claim.getId() == id) {
                 foundClaim = claim;
                 claim.setStatus("approved");
                 break;
@@ -385,8 +381,9 @@ public class DummyDataHelper {
         }
 
         Claim foundClaim = null;
+        int id = Integer.parseInt(claimId);
         for (Claim claim : dummyClaims) {
-            if (claim.getId().equals(claimId)) {
+            if (claim.getId() == id) {
                 foundClaim = claim;
                 claim.setStatus("rejected");
                 claim.setAdminNotes(reason);
