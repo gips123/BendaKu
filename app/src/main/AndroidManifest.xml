@@ -68,6 +68,11 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".ClaimDetailActivity"
+            android:exported="false"
+            android:parentActivityName=".AdminPanelActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.bendaku.fileprovider"

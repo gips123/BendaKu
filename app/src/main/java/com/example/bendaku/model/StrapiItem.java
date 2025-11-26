@@ -3,6 +3,7 @@ package com.example.bendaku.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class StrapiItem implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -40,6 +41,9 @@ public class StrapiItem implements Serializable {
 
     @SerializedName("imageUrl")
     private FlatImage flatImage;
+
+    @SerializedName("claims")
+    private List<StrapiClaim> flatClaims;
 
     @SerializedName("createdAt")
     private String flatCreatedAt;
@@ -159,6 +163,13 @@ public class StrapiItem implements Serializable {
         return flatUpdatedAt;
     }
 
+    public List<StrapiClaim> getClaims() {
+        if (attributes != null && attributes.claims != null && attributes.claims.data != null) {
+            return attributes.claims.data;
+        }
+        return flatClaims;
+    }
+
     public static class Attributes {
         @SerializedName("name")
         private String name;
@@ -189,6 +200,9 @@ public class StrapiItem implements Serializable {
 
         @SerializedName("reporter")
         private UserRelation reporter;
+
+        @SerializedName("claims")
+        private ClaimsRelation claims;
 
         @SerializedName("createdAt")
         private String createdAt;
@@ -229,6 +243,9 @@ public class StrapiItem implements Serializable {
 
         public UserRelation getReporter() { return reporter; }
         public void setReporter(UserRelation reporter) { this.reporter = reporter; }
+
+        public ClaimsRelation getClaims() { return claims; }
+        public void setClaims(ClaimsRelation claims) { this.claims = claims; }
 
         public String getCreatedAt() { return createdAt; }
         public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
@@ -376,6 +393,14 @@ public class StrapiItem implements Serializable {
 
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+    }
+
+    public static class ClaimsRelation {
+        @SerializedName("data")
+        private List<StrapiClaim> data;
+
+        public List<StrapiClaim> getData() { return data; }
+        public void setData(List<StrapiClaim> data) { this.data = data; }
     }
 }
 

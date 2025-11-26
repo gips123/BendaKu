@@ -21,6 +21,7 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
     public interface OnClaimActionListener {
         void onApprove(Claim claim);
         void onReject(Claim claim);
+        void onItemClick(Claim claim);
     }
 
     public ClaimAdapter(List<Claim> claims, OnClaimActionListener listener) {
@@ -69,10 +70,20 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
         }
 
         public void bind(Claim claim, OnClaimActionListener listener) {
-            // Note: Item name would need to be fetched from the Item API or included in the Claim response
-            tvItemName.setText("Item ID: " + claim.getItemId());
-            tvClaimerName.setText("Diklaim oleh: " + claim.getClaimerName());
-            tvClaimDescription.setText(claim.getDescription());
+            // Display item name if available, otherwise show item ID
+            String itemDisplay = claim.getItemName() != null && !claim.getItemName().isEmpty() 
+                    ? claim.getItemName() 
+                    : (claim.getItemId() != null ? "Item ID: " + claim.getItemId() : "Item tidak diketahui");
+            tvItemName.setText(itemDisplay);
+            tvClaimerName.setText("Diklaim oleh: " + (claim.getClaimerName() != null ? claim.getClaimerName() : "N/A"));
+            tvClaimDescription.setText(claim.getDescription() != null ? claim.getDescription() : "Tidak ada deskripsi");
+
+            // Handle item click to open detail
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onItemClick(claim);
+                }
+            });
 
             btnApprove.setOnClickListener(v -> {
                 if (listener != null) {

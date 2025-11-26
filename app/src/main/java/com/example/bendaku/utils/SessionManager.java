@@ -61,6 +61,11 @@ public class SessionManager {
         return pref.getBoolean(KEY_IS_LOGGED_IN, false) && getJwtToken() != null;
     }
 
+    public void updateUser(User user) {
+        editor.putString(KEY_USER, gson.toJson(user));
+        editor.commit();
+    }
+
     public void logout() {
         editor.clear();
         editor.commit();

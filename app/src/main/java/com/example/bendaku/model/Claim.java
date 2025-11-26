@@ -2,7 +2,9 @@ package com.example.bendaku.model;
 
 public class Claim {
     private String id;
+    private String documentId; // Strapi v5 documentId
     private String itemId;
+    private String itemName;
     private String claimerId;
     private String claimerName;
     private String claimerPhone;
@@ -33,8 +35,14 @@ public class Claim {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
+    public String getDocumentId() { return documentId; }
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
+
     public String getItemId() { return itemId; }
     public void setItemId(String itemId) { this.itemId = itemId; }
+
+    public String getItemName() { return itemName; }
+    public void setItemName(String itemName) { this.itemName = itemName; }
 
     public String getClaimerId() { return claimerId; }
     public void setClaimerId(String claimerId) { this.claimerId = claimerId; }

@@ -5,6 +5,7 @@ import com.example.bendaku.model.StrapiClaim;
 import com.example.bendaku.model.StrapiItem;
 import com.example.bendaku.model.StrapiResponse;
 import com.example.bendaku.model.StrapiUploadResponse;
+import com.example.bendaku.model.StrapiUserDetail;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -80,6 +81,16 @@ public interface ApiService {
     );
 
     /**
+     * Get single item by documentId (Strapi v5)
+     * GET /api/items/{documentId}?populate=*
+     */
+    @GET("api/items/{documentId}")
+    Call<StrapiResponse<StrapiItem>> getItemByDocumentId(
+            @Path("documentId") String documentId,
+            @Query("populate") String populate
+    );
+
+    /**
      * Create new item
      * POST /api/items
      * Body: {"data": {...}}
@@ -123,12 +134,12 @@ public interface ApiService {
     );
 
     /**
-     * Get single claim by ID
-     * GET /api/claims/{id}?populate=*
+     * Get single claim by documentId (Strapi v5)
+     * GET /api/claims/{documentId}?populate=*
      */
-    @GET("api/claims/{id}")
+    @GET("api/claims/{documentId}")
     Call<StrapiResponse<StrapiClaim>> getClaim(
-            @Path("id") Integer id,
+            @Path("documentId") String documentId,
             @Query("populate") String populate
     );
 
@@ -141,12 +152,12 @@ public interface ApiService {
     Call<StrapiResponse<StrapiClaim>> createClaim(@Body ClaimRequest request);
 
     /**
-     * Update claim
-     * PUT /api/claims/{id}
+     * Update claim (Strapi v5 uses documentId)
+     * PUT /api/claims/{documentId}
      */
-    @PUT("api/claims/{id}")
+    @PUT("api/claims/{documentId}")
     Call<StrapiResponse<StrapiClaim>> updateClaim(
-            @Path("id") Integer id,
+            @Path("documentId") String documentId,
             @Body ClaimRequest request
     );
 
@@ -156,6 +167,10 @@ public interface ApiService {
      */
     @DELETE("api/claims/{id}")
     Call<StrapiResponse<StrapiClaim>> deleteClaim(@Path("id") Integer id);
+
+    // User profile
+    @GET("api/users/me")
+    Call<StrapiUserDetail> getCurrentUser(@Query("populate") String populate);
 
     // ========== Request Classes ==========
     class LoginRequest {
@@ -231,12 +246,13 @@ public interface ApiService {
             public Integer imageUrl; // ID of uploaded file
             @SerializedName("claimerktm")
             public Integer claimerKtm; // ID foto KTM/identitas
+            public Integer item; // ID of the item being claimed
             public String locale; // Optional: for multi-language
 
             public ClaimData(String claimerName, String claimerPhone, String description,
                            String statusClaim, String adminNotes, Integer imageUrl,
                            Integer claimerKtm, String claimerUsername,
-                           String locale) {
+                           Integer item, String locale) {
                 this.claimerName = claimerName;
                 this.claimerPhone = claimerPhone;
                 this.claimerUsername = claimerUsername;
@@ -245,6 +261,7 @@ public interface ApiService {
                 this.adminNotes = adminNotes;
                 this.imageUrl = imageUrl;
                 this.claimerKtm = claimerKtm;
+                this.item = item;
                 this.locale = locale;
             }
         }

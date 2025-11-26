@@ -291,6 +291,18 @@ public class ClaimFormActivity extends AppCompatActivity {
             claimerName = sessionManager.getUser().getFullName();
         }
 
+        // Parse itemId to Integer
+        Integer itemIdInt = null;
+        try {
+            if (itemId != null && !itemId.isEmpty()) {
+                itemIdInt = Integer.parseInt(itemId);
+            }
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Item ID tidak valid", Toast.LENGTH_SHORT).show();
+            setLoading(false);
+            return;
+        }
+
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claimerName,
                 claimerPhone,
@@ -300,6 +312,7 @@ public class ClaimFormActivity extends AppCompatActivity {
                 proofImageId,
                 ktmImageId,
                 claimerUsername,
+                itemIdInt,
                 null
         );
 
@@ -313,8 +326,8 @@ public class ClaimFormActivity extends AppCompatActivity {
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     Toast.makeText(ClaimFormActivity.this, "Klaim berhasil dikirim", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
+                        finish();
+                    } else {
                     String errorMsg = "Gagal mengirim klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();

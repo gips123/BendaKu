@@ -93,7 +93,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             // Format and set date
             try {
                 if (item.getDateTime() != null && !item.getDateTime().isEmpty()) {
-                    tvDate.setText(getRelativeTimeString(item.getDateTime()));
+                tvDate.setText(getRelativeTimeString(item.getDateTime()));
                 } else {
                     tvDate.setText("");
                 }

@@ -13,6 +13,46 @@ public class StrapiClaim implements Serializable {
     @SerializedName("attributes")
     private Attributes attributes;
 
+    // Flat structure support (when Strapi response is sanitized without attributes wrapper)
+    @SerializedName("documentId")
+    private String documentId;
+
+    @SerializedName("claimerName")
+    private String flatClaimerName;
+
+    @SerializedName("claimerPhone")
+    private String flatClaimerPhone;
+
+    @SerializedName("claimerUsername")
+    private String flatClaimerUsername;
+
+    @SerializedName("description")
+    private String flatDescription;
+
+    @SerializedName("statusClaim")
+    private String flatStatusClaim;
+
+    @SerializedName("adminNotes")
+    private String flatAdminNotes;
+
+    @SerializedName("imageUrl")
+    private FlatImage flatImageUrl;
+
+    @SerializedName("claimerktm")
+    private FlatImage flatClaimerKtm;
+
+    @SerializedName("item")
+    private FlatItem flatItem;
+
+    @SerializedName("createdAt")
+    private String flatCreatedAt;
+
+    @SerializedName("updatedAt")
+    private String flatUpdatedAt;
+
+    @SerializedName("publishedAt")
+    private String flatPublishedAt;
+
     public StrapiClaim() {}
 
     public Integer getId() {
@@ -21,6 +61,14 @@ public class StrapiClaim implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public Attributes getAttributes() {
@@ -33,37 +81,63 @@ public class StrapiClaim implements Serializable {
 
     // Helper methods
     public String getClaimerName() {
-        return attributes != null ? attributes.claimerName : null;
+        if (attributes != null && attributes.claimerName != null) {
+            return attributes.claimerName;
+        }
+        return flatClaimerName;
     }
 
     public String getClaimerPhone() {
-        return attributes != null ? attributes.claimerPhone : null;
+        if (attributes != null && attributes.claimerPhone != null) {
+            return attributes.claimerPhone;
+        }
+        return flatClaimerPhone;
     }
 
     public String getClaimerUsername() {
-        return attributes != null ? attributes.claimerUsername : null;
+        if (attributes != null && attributes.claimerUsername != null) {
+            return attributes.claimerUsername;
+        }
+        return flatClaimerUsername;
     }
 
     public String getDescription() {
-        return attributes != null ? attributes.description : null;
+        if (attributes != null && attributes.description != null) {
+            return attributes.description;
+        }
+        return flatDescription;
     }
 
     public String getStatusClaim() {
-        return attributes != null ? attributes.statusClaim : null;
+        if (attributes != null && attributes.statusClaim != null) {
+            return attributes.statusClaim;
+        }
+        return flatStatusClaim;
     }
 
     public String getAdminNotes() {
-        return attributes != null ? attributes.adminNotes : null;
+        if (attributes != null && attributes.adminNotes != null) {
+            return attributes.adminNotes;
+        }
+        return flatAdminNotes;
     }
 
     public String getImageUrl() {
+        // Check nested structure first
         if (attributes != null && attributes.imageUrl != null && attributes.imageUrl.data != null) {
-            return attributes.imageUrl.data.attributes != null ? attributes.imageUrl.data.attributes.url : null;
+            if (attributes.imageUrl.data.attributes != null) {
+                return attributes.imageUrl.data.attributes.url;
+            }
+        }
+        // Check flat structure
+        if (flatImageUrl != null) {
+            return flatImageUrl.getUrl();
         }
         return null;
     }
 
     public String getClaimerKtmUrl() {
+        // Check nested structure first
         if (attributes != null && attributes.claimerKtm != null) {
             if (attributes.claimerKtm.data != null && attributes.claimerKtm.data.attributes != null) {
                 return attributes.claimerKtm.data.attributes.url;
@@ -72,10 +146,15 @@ public class StrapiClaim implements Serializable {
                 return attributes.claimerKtm.directUrl;
             }
         }
+        // Check flat structure
+        if (flatClaimerKtm != null) {
+            return flatClaimerKtm.getUrl();
+        }
         return null;
     }
 
     public Integer getClaimerKtmId() {
+        // Check nested structure first
         if (attributes != null && attributes.claimerKtm != null) {
             if (attributes.claimerKtm.data != null) {
                 return attributes.claimerKtm.data.id;
@@ -84,18 +163,89 @@ public class StrapiClaim implements Serializable {
                 return attributes.claimerKtm.directId;
             }
         }
+        // Check flat structure
+        if (flatClaimerKtm != null) {
+            return flatClaimerKtm.getId();
+        }
         return null;
     }
 
     public Integer getImageId() {
+        // Check nested structure first
         if (attributes != null && attributes.imageUrl != null && attributes.imageUrl.data != null) {
             return attributes.imageUrl.data.id;
+        }
+        // Check flat structure
+        if (flatImageUrl != null) {
+            return flatImageUrl.getId();
         }
         return null;
     }
 
     public String getCreatedAt() {
-        return attributes != null ? attributes.createdAt : null;
+        if (attributes != null && attributes.createdAt != null) {
+            return attributes.createdAt;
+        }
+        return flatCreatedAt;
+    }
+
+    public Integer getItemId() {
+        // Check nested structure first
+        if (attributes != null && attributes.item != null) {
+            // Handle flat structure (item is direct ID)
+            if (attributes.item.directId != null) {
+                return attributes.item.directId;
+            }
+            // Handle nested structure (item.data.id)
+            if (attributes.item.data != null && attributes.item.data.id != null) {
+                return attributes.item.data.id;
+            }
+        }
+        // Check flat structure
+        if (flatItem != null) {
+            return flatItem.getId();
+        }
+        return null;
+    }
+
+    public StrapiItem getItem() {
+        // Check nested structure first
+        if (attributes != null && attributes.item != null) {
+            // Handle nested structure (item.data.attributes)
+            if (attributes.item.data != null && attributes.item.data.item != null) {
+                return attributes.item.data.item;
+            }
+        }
+        // Flat structure returns null for full item object (only ID available)
+        return null;
+    }
+
+    public String getItemName() {
+        // Check nested structure first
+        if (attributes != null && attributes.item != null) {
+            // Handle nested structure
+            if (attributes.item.data != null) {
+                if (attributes.item.data.item != null) {
+                    return attributes.item.data.item.getName();
+                }
+                if (attributes.item.data.flatName != null) {
+                    return attributes.item.data.flatName;
+                }
+            }
+            // Handle flat structure
+            if (attributes.item.flatName != null) {
+                return attributes.item.flatName;
+            }
+        }
+        // Check flat structure
+        if (flatItem != null) {
+            return flatItem.getName();
+        }
+        return null;
+    }
+
+    public FlatItem getFlatItem() {
+        return flatItem;
     }
 
     public static class Attributes {
@@ -125,6 +275,9 @@ public class StrapiClaim implements Serializable {
 
         @SerializedName("claimer")
         private UserRelation claimer;
+
+        @SerializedName("item")
+        private ItemRelation item;
 
         @SerializedName("createdAt")
         private String createdAt;
@@ -159,6 +312,9 @@ public class StrapiClaim implements Serializable {
 
         public UserRelation getClaimer() { return claimer; }
         public void setClaimer(UserRelation claimer) { this.claimer = claimer; }
+
+        public ItemRelation getItem() { return item; }
+        public void setItem(ItemRelation item) { this.item = item; }
 
         public String getCreatedAt() { return createdAt; }
         public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
@@ -258,6 +414,148 @@ public class StrapiClaim implements Serializable {
 
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+    }
+
+    public static class ItemRelation {
+        @SerializedName("data")
+        private ItemData data;
+
+        @SerializedName("id")
+        private Integer directId;
+
+        // Flat structure support (when item is directly an object, not nested in data)
+        @SerializedName("name")
+        private String flatName;
+
+        @SerializedName("documentId")
+        private String flatDocumentId;
+
+        public ItemData getData() { return data; }
+        public void setData(ItemData data) { this.data = data; }
+
+        public Integer getDirectId() { return directId; }
+
+        public String getFlatName() { return flatName; }
+        public String getFlatDocumentId() { return flatDocumentId; }
+    }
+
+    public static class ItemData {
+        @SerializedName("id")
+        private Integer id;
+
+        @SerializedName("attributes")
+        private StrapiItem item;
+
+        // Flat structure support (when item is directly an object)
+        @SerializedName("name")
+        private String flatName;
+
+        @SerializedName("documentId")
+        private String flatDocumentId;
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
+
+        public StrapiItem getItem() { return item; }
+        public void setItem(StrapiItem item) { this.item = item; }
+
+        public String getFlatName() { return flatName; }
+        public String getFlatDocumentId() { return flatDocumentId; }
+    }
+
+    // Flat structure classes
+    public static class FlatImage {
+        @SerializedName("id")
+        private Integer id;
+
+        @SerializedName("url")
+        private String url;
+
+        @SerializedName("name")
+        private String name;
+
+        @SerializedName("documentId")
+        private String documentId;
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
+
+        public String getUrl() { return url; }
+        public void setUrl(String url) { this.url = url; }
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public String getDocumentId() { return documentId; }
+        public void setDocumentId(String documentId) { this.documentId = documentId; }
+    }
+
+    public static class FlatItem {
+        @SerializedName("id")
+        private Integer id;
+
+        @SerializedName("documentId")
+        private String documentId;
+
+        @SerializedName("name")
+        private String name;
+
+        @SerializedName("location")
+        private String location;
+
+        @SerializedName("description")
+        private String description;
+
+        @SerializedName("dateTime")
+        private String dateTime;
+
+        @SerializedName("type")
+        private String type;
+
+        @SerializedName("statusItem")
+        private String statusItem;
+
+        @SerializedName("reporterName")
+        private String reporterName;
+
+        @SerializedName("reporterPhone")
+        private String reporterPhone;
+
+        @SerializedName("imageUrl")
+        private FlatImage imageUrl;
+
+        public Integer getId() { return id; }
+        public void setId(Integer id) { this.id = id; }
+
+        public String getDocumentId() { return documentId; }
+        public void setDocumentId(String documentId) { this.documentId = documentId; }
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public String getLocation() { return location; }
+        public void setLocation(String location) { this.location = location; }
+
+        public String getDescription() { return description; }
+        public void setDescription(String description) { this.description = description; }
+
+        public String getDateTime() { return dateTime; }
+        public void setDateTime(String dateTime) { this.dateTime = dateTime; }
+
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+
+        public String getStatusItem() { return statusItem; }
+        public void setStatusItem(String statusItem) { this.statusItem = statusItem; }
+
+        public String getReporterName() { return reporterName; }
+        public void setReporterName(String reporterName) { this.reporterName = reporterName; }
+
+        public String getReporterPhone() { return reporterPhone; }
+        public void setReporterPhone(String reporterPhone) { this.reporterPhone = reporterPhone; }
+
+        public FlatImage getImageUrl() { return imageUrl; }
+        public void setImageUrl(FlatImage imageUrl) { this.imageUrl = imageUrl; }
     }
 }
 

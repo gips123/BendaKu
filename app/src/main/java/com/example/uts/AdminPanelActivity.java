@@ -1,5 +1,6 @@
 package com.example.uts;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -76,6 +77,11 @@ public class AdminPanelActivity extends AppCompatActivity {
             public void onReject(Claim claim) {
                 rejectClaim(claim);
             }
+
+            @Override
+            public void onItemClick(Claim claim) {
+                openClaimDetail(claim);
+            }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
@@ -100,7 +106,7 @@ public class AdminPanelActivity extends AppCompatActivity {
                     if (strapiClaims != null && !strapiClaims.isEmpty()) {
                         // Convert StrapiClaim to Claim for adapter
                         List<Claim> claims = convertStrapiClaimsToClaims(strapiClaims);
-                        adapter.updateClaims(claims);
+                            adapter.updateClaims(claims);
                     } else {
                         adapter.updateClaims(new ArrayList<>());
                     }
@@ -130,12 +136,26 @@ public class AdminPanelActivity extends AppCompatActivity {
         for (StrapiClaim strapiClaim : strapiClaims) {
             Claim claim = new Claim();
             claim.setId(String.valueOf(strapiClaim.getId()));
+            claim.setDocumentId(strapiClaim.getDocumentId()); // Store documentId for Strapi v5
             claim.setClaimerName(strapiClaim.getClaimerName());
             claim.setClaimerPhone(strapiClaim.getClaimerPhone());
             claim.setClaimerUsername(strapiClaim.getClaimerUsername());
             claim.setDescription(strapiClaim.getDescription());
             claim.setStatus(strapiClaim.getStatusClaim()); // Map statusClaim to status
             claim.setAdminNotes(strapiClaim.getAdminNotes());
+            
+            // Set item ID from relation (handle both nested and flat structure)
+            Integer itemId = strapiClaim.getItemId();
+            if (itemId != null) {
+                claim.setItemId(String.valueOf(itemId));
+            }
+            
+            // Get item name from flat structure if available
+            String itemName = strapiClaim.getItemName();
+            if (itemName == null && strapiClaim.getFlatItem() != null) {
+                itemName = strapiClaim.getFlatItem().getName();
+            }
+            claim.setItemName(itemName);
             
             // Save image ID for update operations
             claim.setImageId(strapiClaim.getImageId());
@@ -168,10 +188,24 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void approveClaim(Claim claim) {
-        // Update claim status to "approved"
-        Integer claimId = Integer.parseInt(claim.getId());
+        // Update claim status to "approved" - use documentId for Strapi v5
+        String claimDocumentId = claim.getDocumentId();
+        if (claimDocumentId == null || claimDocumentId.isEmpty()) {
+            showError("Document ID tidak tersedia");
+            return;
+        }
         
-        // Create update request with approved status, keeping existing imageUrl and claimer
+        // Parse itemId to Integer
+        Integer itemIdInt = null;
+        try {
+            if (claim.getItemId() != null && !claim.getItemId().isEmpty()) {
+                itemIdInt = Integer.parseInt(claim.getItemId());
+            }
+        } catch (NumberFormatException e) {
+            // Item ID not available, continue without it
+        }
+        
+        // Create update request with approved status, keeping existing imageUrl, claimer, and item
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claim.getClaimerName(),
                 claim.getClaimerPhone(),
@@ -181,19 +215,20 @@ public class AdminPanelActivity extends AppCompatActivity {
                 claim.getImageId(), // imageUrl - keep existing
                 claim.getClaimerKtmId(),
                 claim.getClaimerUsername(),
+                itemIdInt, // item - keep existing
                 null  // locale
         );
         
         ApiService.ClaimRequest request = new ApiService.ClaimRequest(claimData);
         
-        Call<StrapiResponse<StrapiClaim>> call = apiService.updateClaim(claimId, request);
+        Call<StrapiResponse<StrapiClaim>> call = apiService.updateClaim(claimDocumentId, request);
         call.enqueue(new Callback<StrapiResponse<StrapiClaim>>() {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
-                    loadPendingClaims();
-                } else {
+                        Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
+                        loadPendingClaims();
+                    } else {
                     String errorMsg = "Gagal menyetujui klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();
@@ -210,10 +245,24 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void rejectClaim(Claim claim) {
-        // Update claim status to "rejected"
-        Integer claimId = Integer.parseInt(claim.getId());
+        // Update claim status to "rejected" - use documentId for Strapi v5
+        String claimDocumentId = claim.getDocumentId();
+        if (claimDocumentId == null || claimDocumentId.isEmpty()) {
+            showError("Document ID tidak tersedia");
+            return;
+        }
         
-        // Create update request with rejected status, keeping existing imageUrl and claimer
+        // Parse itemId to Integer
+        Integer itemIdInt = null;
+        try {
+            if (claim.getItemId() != null && !claim.getItemId().isEmpty()) {
+                itemIdInt = Integer.parseInt(claim.getItemId());
+            }
+        } catch (NumberFormatException e) {
+            // Item ID not available, continue without it
+        }
+        
+        // Create update request with rejected status, keeping existing imageUrl, claimer, and item
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claim.getClaimerName(),
                 claim.getClaimerPhone(),
@@ -223,19 +272,20 @@ public class AdminPanelActivity extends AppCompatActivity {
                 claim.getImageId(), // imageUrl - keep existing
                 claim.getClaimerKtmId(),
                 claim.getClaimerUsername(),
+                itemIdInt, // item - keep existing
                 null  // locale
         );
         
         ApiService.ClaimRequest request = new ApiService.ClaimRequest(claimData);
         
-        Call<StrapiResponse<StrapiClaim>> call = apiService.updateClaim(claimId, request);
+        Call<StrapiResponse<StrapiClaim>> call = apiService.updateClaim(claimDocumentId, request);
         call.enqueue(new Callback<StrapiResponse<StrapiClaim>>() {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(AdminPanelActivity.this, "Klaim ditolak", Toast.LENGTH_SHORT).show();
-                    loadPendingClaims();
-                } else {
+                        Toast.makeText(AdminPanelActivity.this, "Klaim ditolak", Toast.LENGTH_SHORT).show();
+                        loadPendingClaims();
+                    } else {
                     String errorMsg = "Gagal menolak klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();
@@ -249,6 +299,23 @@ public class AdminPanelActivity extends AppCompatActivity {
                 showError("Error: " + t.getMessage());
             }
         });
+    }
+
+    private void openClaimDetail(Claim claim) {
+        Intent intent = new Intent(this, ClaimDetailActivity.class);
+        intent.putExtra("claim_document_id", claim.getDocumentId()); // Use documentId for Strapi v5
+        intent.putExtra("claim_item_id", claim.getItemId());
+        intent.putExtra("claim_item_name", claim.getItemName());
+        intent.putExtra("claim_claimer_name", claim.getClaimerName());
+        intent.putExtra("claim_claimer_phone", claim.getClaimerPhone());
+        intent.putExtra("claim_claimer_username", claim.getClaimerUsername());
+        intent.putExtra("claim_description", claim.getDescription());
+        intent.putExtra("claim_status", claim.getStatus());
+        intent.putExtra("claim_admin_notes", claim.getAdminNotes());
+        intent.putExtra("claim_proof_image_url", claim.getProofImageUrl());
+        intent.putExtra("claim_ktm_image_url", claim.getClaimerKtmUrl());
+        intent.putExtra("claim_created_at", claim.getCreatedAt());
+        startActivity(intent);
     }
 
     private void showError(String message) {

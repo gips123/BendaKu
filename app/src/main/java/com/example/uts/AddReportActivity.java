@@ -330,7 +330,7 @@ public class AddReportActivity extends AppCompatActivity {
             btnSubmit.setText("Kirim Laporan");
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
-        }
+            }
     }
 
     private void createItem(String itemName, String description, String location,
@@ -358,14 +358,14 @@ public class AddReportActivity extends AppCompatActivity {
                 btnSubmit.setText("Kirim Laporan");
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
-                    Toast.makeText(AddReportActivity.this,
-                            "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
-                            Toast.LENGTH_LONG).show();
+                String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
+                Toast.makeText(AddReportActivity.this,
+                    "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
+                    Toast.LENGTH_LONG).show();
 
-                    // Close activity and return to main
-                    setResult(RESULT_OK);
-                    finish();
+                // Close activity and return to main
+                setResult(RESULT_OK);
+                finish();
                 } else {
                     String errorMsg = "Gagal mengirim laporan";
                     if (response.body() != null && response.body().getError() != null) {
