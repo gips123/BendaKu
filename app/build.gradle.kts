@@ -33,6 +33,14 @@ android {
     buildFeatures {
         viewBinding = true
     }
+
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -70,6 +78,11 @@ dependencies {
 
     // Shared preferences
     implementation("androidx.preference:preference:1.2.1")
+
+    // Room Database
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    annotationProcessor("androidx.room:room-compiler:$roomVersion")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

@@ -18,6 +18,8 @@ import com.example.bendaku.api.ApiService;
 import com.example.bendaku.model.Claim;
 import com.example.bendaku.model.StrapiClaim;
 import com.example.bendaku.model.StrapiResponse;
+import com.example.bendaku.repository.ClaimRepository;
+import com.example.bendaku.repository.ItemRepository;
 import com.example.bendaku.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -35,6 +37,8 @@ public class AdminPanelActivity extends AppCompatActivity {
     private ClaimAdapter adapter;
     private SessionManager sessionManager;
     private ApiService apiService;
+    private ClaimRepository claimRepository;
+    private ItemRepository itemRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +68,8 @@ public class AdminPanelActivity extends AppCompatActivity {
         ApiClient.init(this);
         sessionManager = new SessionManager(this);
         apiService = ApiClient.getApiService();
+        claimRepository = new ClaimRepository(this);
+        itemRepository = new ItemRepository(this);
     }
 
     private void checkAdminAccess() {
@@ -118,41 +124,28 @@ public class AdminPanelActivity extends AppCompatActivity {
     private void loadPendingClaims() {
         swipeRefresh.setRefreshing(true);
 
-        // Get claims with status "pending"
-        Call<StrapiResponse<List<StrapiClaim>>> call = apiService.getClaimsByStatus("*", "pending");
-        call.enqueue(new Callback<StrapiResponse<List<StrapiClaim>>>() {
-            @Override
-            public void onResponse(Call<StrapiResponse<List<StrapiClaim>>> call, Response<StrapiResponse<List<StrapiClaim>>> response) {
-                swipeRefresh.setRefreshing(false);
-
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    List<StrapiClaim> strapiClaims = response.body().getData();
-                    if (strapiClaims != null && !strapiClaims.isEmpty()) {
-                        // Convert StrapiClaim to Claim for adapter
-                        List<Claim> claims = convertStrapiClaimsToClaims(strapiClaims);
-                            adapter.updateClaims(claims);
+        if (claimRepository != null) {
+            claimRepository.getPendingClaims(new ClaimRepository.DataCallback() {
+                @Override
+                public void onDataLoaded(List<Claim> claims) {
+                    swipeRefresh.setRefreshing(false);
+                    if (claims != null && !claims.isEmpty()) {
+                        adapter.updateClaims(claims);
                     } else {
                         adapter.updateClaims(new ArrayList<>());
                     }
-                } else {
-                    String errorMsg = "Gagal memuat klaim";
-                    if (response.body() != null && response.body().getError() != null) {
-                        errorMsg = response.body().getError().getMessage();
-                    }
-                    showError(errorMsg);
                 }
-            }
 
-            @Override
-            public void onFailure(Call<StrapiResponse<List<StrapiClaim>>> call, Throwable t) {
-                swipeRefresh.setRefreshing(false);
-                String errorMsg = "Error: " + t.getMessage();
-                if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
-                    errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan.";
+                @Override
+                public void onError(String error) {
+                    swipeRefresh.setRefreshing(false);
+                    showError(error);
                 }
-                showError(errorMsg);
-            }
-        });
+            });
+        } else {
+            swipeRefresh.setRefreshing(false);
+            showError("Repository tidak tersedia");
+        }
     }
 
     private List<Claim> convertStrapiClaimsToClaims(List<StrapiClaim> strapiClaims) {
@@ -304,7 +297,7 @@ public class AdminPanelActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     private void updateClaimStatus(Claim claim, String claimDocumentId, Integer itemIdInt) {
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claim.getClaimerName(),
@@ -326,9 +319,17 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
-                    loadPendingClaims();
-                } else {
+                    // Update database
+                    if (itemRepository != null && claim.getItemId() != null) {
+                        itemRepository.updateItemStatus(claim.getItemId(), "claimed");
+                    }
+                    if (claimRepository != null) {
+                        claimRepository.updateClaimStatus(claimDocumentId, "approved", "Klaim disetujui oleh admin");
+                        claimRepository.updateClaimsItemStatus(claim.getItemId(), "claimed");
+                    }
+                        Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
+                        loadPendingClaims();
+                    } else {
                     String errorMsg = "Gagal menyetujui klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();
@@ -383,6 +384,10 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    // Update database
+                    if (claimRepository != null) {
+                        claimRepository.updateClaimStatus(claimDocumentId, "rejected", "Klaim ditolak oleh admin");
+                    }
                         Toast.makeText(AdminPanelActivity.this, "Klaim ditolak", Toast.LENGTH_SHORT).show();
                         loadPendingClaims();
                     } else {

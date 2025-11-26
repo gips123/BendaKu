@@ -11,6 +11,9 @@ public class StrapiItem implements Serializable {
     @SerializedName("id")
     private Integer id;
 
+    @SerializedName("documentId")
+    private String documentId;
+
     @SerializedName("attributes")
     private Attributes attributes;
 
@@ -59,6 +62,14 @@ public class StrapiItem implements Serializable {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
     }
 
     public Attributes getAttributes() {

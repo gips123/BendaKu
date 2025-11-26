@@ -40,13 +40,6 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:src="@tools:sample/avatars" />
 
-            <!-- Gradient Overlay for better text readability -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@drawable/gradient_overlay"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
             <!-- Status Badge -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/statusBadge"

@@ -20,6 +20,7 @@ import com.example.bendaku.api.ApiService;
 import com.example.bendaku.model.Item;
 import com.example.bendaku.model.StrapiItem;
 import com.example.bendaku.model.StrapiResponse;
+import com.example.bendaku.repository.ItemRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ public class ItemListFragment extends Fragment {
     private LinearLayout loadingState;
     private ItemAdapter adapter;
     private ApiService apiService;
+    private ItemRepository itemRepository;
     private List<Item> allItems = new ArrayList<>();
     private String currentSearchQuery = "";
 
@@ -58,6 +60,7 @@ public class ItemListFragment extends Fragment {
         }
         if (getContext() != null) {
             ApiClient.init(getContext());
+            itemRepository = new ItemRepository(getContext());
         }
         apiService = ApiClient.getApiService();
     }
@@ -102,50 +105,34 @@ public class ItemListFragment extends Fragment {
         showLoading();
         swipeRefresh.setRefreshing(true);
 
-        Call<StrapiResponse<List<StrapiItem>>> call;
-        if (itemType != null && !itemType.isEmpty()) {
-            call = apiService.getItemsByType("*", itemType);
-        } else {
-            call = apiService.getItems("*");
-        }
+        if (itemRepository != null) {
+            itemRepository.getItems(itemType, "open", new ItemRepository.DataCallback() {
+                @Override
+                public void onDataLoaded(List<Item> items) {
+                    swipeRefresh.setRefreshing(false);
+                    hideLoading();
 
-        call.enqueue(new Callback<StrapiResponse<List<StrapiItem>>>() {
-            @Override
-            public void onResponse(Call<StrapiResponse<List<StrapiItem>>> call, Response<StrapiResponse<List<StrapiItem>>> response) {
-                swipeRefresh.setRefreshing(false);
-                hideLoading();
+                        if (items != null && !items.isEmpty()) {
+                            allItems = new ArrayList<>(items);
+                            performSearch(currentSearchQuery);
+                        } else {
+                            allItems.clear();
+                            showEmpty();
+                        }
+                }
 
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    List<StrapiItem> strapiItems = response.body().getData();
-                    if (strapiItems != null && !strapiItems.isEmpty()) {
-                        List<Item> items = convertStrapiItemsToItems(strapiItems);
-                        List<Item> openItems = filterOpenItems(items);
-                        allItems = new ArrayList<>(openItems);
-                        performSearch(currentSearchQuery);
+                @Override
+                public void onError(String error) {
+                    swipeRefresh.setRefreshing(false);
+                    hideLoading();
+                    showError(error);
+                }
+            });
                     } else {
-                        allItems.clear();
-                        showEmpty();
-                    }
-                } else {
-                    String errorMsg = "Gagal memuat data";
-                    if (response.body() != null && response.body().getError() != null) {
-                        errorMsg = response.body().getError().getMessage();
-                    }
-                    showError(errorMsg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<StrapiResponse<List<StrapiItem>>> call, Throwable t) {
-                swipeRefresh.setRefreshing(false);
-                hideLoading();
-                String errorMsg = "Error: " + t.getMessage();
-                if (t.getMessage() != null && t.getMessage().contains("Failed to connect")) {
-                    errorMsg = "Tidak dapat terhubung ke server. Pastikan backend Strapi berjalan.";
-                }
-                showError(errorMsg);
-            }
-        });
+            swipeRefresh.setRefreshing(false);
+            hideLoading();
+            showError("Repository tidak tersedia");
+        }
     }
 
     private List<Item> convertStrapiItemsToItems(List<StrapiItem> strapiItems) {

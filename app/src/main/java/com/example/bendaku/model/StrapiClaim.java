@@ -189,6 +189,13 @@ public class StrapiClaim implements Serializable {
         return flatCreatedAt;
     }
 
+    public String getUpdatedAt() {
+        if (attributes != null && attributes.updatedAt != null) {
+            return attributes.updatedAt;
+        }
+        return flatUpdatedAt;
+    }
+
     public Integer getItemId() {
         // Check nested structure first
         if (attributes != null && attributes.item != null) {

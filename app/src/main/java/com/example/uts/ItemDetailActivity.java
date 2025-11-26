@@ -57,8 +57,8 @@ public class ItemDetailActivity extends AppCompatActivity {
         if (currentItem != null) {
             displayItemDetails();
         } else {
-            Toast.makeText(this, "Item tidak ditemukan", Toast.LENGTH_SHORT).show();
-            finish();
+                Toast.makeText(this, "Item tidak ditemukan", Toast.LENGTH_SHORT).show();
+                finish();
         }
     }
 
