@@ -64,7 +64,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         private TextView tvLocation;
         private TextView tvDate;
         private TextView tvStatus;
-        private TextView tvCategoryIcon;
         private MaterialCardView statusBadge;
         private MaterialButton btnContact;
         private MaterialButton btnDetail;
@@ -78,7 +77,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             tvLocation = itemView.findViewById(R.id.tvLocation);
             tvDate = itemView.findViewById(R.id.tvDate);
             tvStatus = itemView.findViewById(R.id.tvStatus);
-            tvCategoryIcon = itemView.findViewById(R.id.tvCategoryIcon);
             statusBadge = itemView.findViewById(R.id.statusBadge);
             btnContact = itemView.findViewById(R.id.btnContact);
             btnDetail = itemView.findViewById(R.id.btnDetail);
@@ -106,11 +104,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             if ("lost".equals(itemType)) {
                 tvStatus.setText("HILANG");
                 statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.error));
-                tvCategoryIcon.setText(getCategoryIcon(item.getName(), "lost"));
             } else {
                 tvStatus.setText("DITEMUKAN");
                 statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.success));
-                tvCategoryIcon.setText(getCategoryIcon(item.getName(), "found"));
             }
 
             // Load image with proper drawable handling

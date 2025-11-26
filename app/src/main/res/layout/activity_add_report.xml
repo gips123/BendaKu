@@ -78,11 +78,11 @@
                             android:layout_width="0dp"
                             android:layout_height="56dp"
                             android:layout_weight="1"
-                            android:text="🔍 Barang Hilang"
+                            android:text="Barang Hilang"
                             android:textColor="@color/text_primary"
                             android:fontFamily="sans-serif-medium"
                             android:textAllCaps="false"
-                            app:cornerRadius="16dp"
+                            app:cornerRadius="999dp"
                             app:strokeColor="@color/divider_color" />
 
                         <com.google.android.material.button.MaterialButton
@@ -91,11 +91,11 @@
                             android:layout_width="0dp"
                             android:layout_height="56dp"
                             android:layout_weight="1"
-                            android:text="✨ Barang Ditemukan"
+                            android:text="Barang Ditemukan"
                             android:textColor="@color/text_primary"
                             android:fontFamily="sans-serif-medium"
                             android:textAllCaps="false"
-                            app:cornerRadius="16dp"
+                            app:cornerRadius="999dp"
                             app:strokeColor="@color/divider_color" />
 
                     </com.google.android.material.button.MaterialButtonToggleGroup>
@@ -165,13 +165,6 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="📷"
-                                android:textSize="48sp"
-                                android:layout_marginBottom="12dp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
                                 android:text="Tap untuk menambah foto"
                                 android:textSize="16sp"
                                 android:textColor="@color/text_secondary"
@@ -234,9 +227,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="@color/accent_blue"
-                        app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@android:drawable/ic_input_get"
-                        app:startIconTint="@color/text_secondary">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etItemName"
@@ -261,10 +252,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="@color/accent_blue"
-                        app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@android:drawable/ic_menu_edit"
-                        app:startIconTint="@color/text_secondary">
-
+                        app:hintTextColor="@color/text_secondary">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etDescription"
                             android:layout_width="match_parent"
@@ -288,10 +276,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="@color/accent_blue"
-                        app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@android:drawable/ic_dialog_map"
-                        app:startIconTint="@color/text_secondary">
-
+                        app:hintTextColor="@color/text_secondary">
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etLocation"
                             android:layout_width="match_parent"
@@ -345,9 +330,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="@color/accent_blue"
-                        app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@android:drawable/ic_menu_myplaces"
-                        app:startIconTint="@color/text_secondary">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etName"
@@ -371,9 +354,7 @@
                         app:boxCornerRadiusBottomStart="12dp"
                         app:boxCornerRadiusBottomEnd="12dp"
                         app:boxStrokeColor="@color/accent_blue"
-                        app:hintTextColor="@color/text_secondary"
-                        app:startIconDrawable="@android:drawable/ic_menu_call"
-                        app:startIconTint="@color/text_secondary">
+                        app:hintTextColor="@color/text_secondary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/etPhone"
@@ -399,12 +380,9 @@
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="false"
-                app:cornerRadius="20dp"
+                app:cornerRadius="999dp"
                 app:backgroundTint="@color/accent_blue"
                 android:textColor="@android:color/white"
-                app:icon="@android:drawable/ic_menu_send"
-                app:iconSize="20dp"
-                app:iconTint="@android:color/white"
                 android:layout_marginBottom="24dp" />
 
         </LinearLayout>

@@ -85,7 +85,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Detail Klaim");
         }
-        toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void loadClaimDetail() {
@@ -390,6 +389,12 @@ public class ClaimDetailActivity extends AppCompatActivity {
                 Toast.makeText(ClaimDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }
 

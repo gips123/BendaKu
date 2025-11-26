@@ -115,19 +115,12 @@
                             android:gravity="center_vertical"
                             android:layout_marginBottom="12dp">
 
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_location"
-                                android:tint="@color/primary_blue" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Lokasi"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                                 android:textColor="@color/text_secondary"
-                                android:layout_marginStart="12dp"
                                 android:layout_marginEnd="16dp"
                                 android:minWidth="80dp" />
 
@@ -151,19 +144,12 @@
                             android:gravity="center_vertical"
                             android:layout_marginBottom="12dp">
 
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_date"
-                                android:tint="@color/primary_blue" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Tanggal"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                                 android:textColor="@color/text_secondary"
-                                android:layout_marginStart="12dp"
                                 android:layout_marginEnd="16dp"
                                 android:minWidth="80dp" />
 
@@ -185,19 +171,12 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical">
 
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_person"
-                                android:tint="@color/primary_blue" />
-
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Pelapor"
                                 android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
                                 android:textColor="@color/text_secondary"
-                                android:layout_marginStart="12dp"
                                 android:layout_marginEnd="16dp"
                                 android:minWidth="80dp" />
 
@@ -249,53 +228,47 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Action Buttons -->
-            <LinearLayout
+            <!-- Spacer for bottom buttons -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="24dp">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnContact"
-                    style="@style/PrimaryButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Hubungi"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                    app:icon="@drawable/ic_phone"
-                    app:iconGravity="start" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnClaim"
-                    style="@style/SecondaryButtonStyle"
-                    android:layout_width="0dp"
-                    android:layout_height="56dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="Klaim Barang"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
-                    app:icon="@drawable/ic_claim"
-                    app:iconGravity="start" />
-
-            </LinearLayout>
+                android:layout_height="80dp" />
 
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Share FAB -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabShare"
-        android:layout_width="wrap_content"
+    <!-- Action Buttons - Fixed at Bottom -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_share"
-        android:contentDescription="Bagikan"
-        style="@style/ModernFABStyle" />
+        android:orientation="horizontal"
+        android:background="@color/surface_elevated"
+        android:elevation="8dp"
+        android:padding="16dp"
+        android:layout_gravity="bottom">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnContact"
+            style="@style/PrimaryButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:text="Hubungi"
+            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+            app:cornerRadius="999dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClaim"
+            style="@style/SecondaryButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Klaim Barang"
+            android:textAppearance="@style/TextAppearance.Material3.LabelLarge"
+            app:cornerRadius="999dp" />
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

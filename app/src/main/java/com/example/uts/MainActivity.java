@@ -84,10 +84,10 @@ public class MainActivity extends AppCompatActivity {
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
             switch (position) {
                 case 0:
-                    tab.setText("🔍 " + getString(R.string.lost_items));
+                    tab.setText(getString(R.string.lost_items));
                     break;
                 case 1:
-                    tab.setText("✨ " + getString(R.string.found_items));
+                    tab.setText(getString(R.string.found_items));
                     break;
             }
         }).attach();

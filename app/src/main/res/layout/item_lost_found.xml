@@ -73,27 +73,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Category Icon -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/categoryIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="12dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="@color/surface_elevated"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <TextView
-                    android:id="@+id/tvCategoryIcon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="📱"
-                    android:textSize="20sp" />
-
-            </com.google.android.material.card.MaterialCardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -153,11 +132,12 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="6dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📍"
-                        android:textSize="14sp"
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_pin"
+                        android:contentDescription="Lokasi"
+                        android:tint="@color/text_secondary"
                         android:layout_marginEnd="8dp" />
 
                     <TextView
@@ -181,11 +161,12 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🕒"
-                        android:textSize="14sp"
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@android:drawable/ic_menu_recent_history"
+                        android:contentDescription="Waktu"
+                        android:tint="@color/text_secondary"
                         android:layout_marginEnd="8dp" />
 
                     <TextView
@@ -230,13 +211,10 @@
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="false"
-                app:cornerRadius="20dp"
+                app:cornerRadius="999dp"
                 app:strokeColor="@color/accent_blue"
                 android:textColor="@color/accent_blue"
-                android:layout_marginEnd="12dp"
-                app:icon="@android:drawable/ic_menu_call"
-                app:iconSize="16dp"
-                app:iconTint="@color/accent_blue" />
+                android:layout_marginEnd="12dp" />
 
             <!-- Detail Button -->
             <com.google.android.material.button.MaterialButton
@@ -248,12 +226,9 @@
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium"
                 android:textAllCaps="false"
-                app:cornerRadius="20dp"
+                app:cornerRadius="999dp"
                 app:backgroundTint="@color/accent_blue"
-                android:textColor="@android:color/white"
-                app:icon="@android:drawable/ic_menu_info_details"
-                app:iconSize="16dp"
-                app:iconTint="@android:color/white" />
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 

@@ -106,7 +106,8 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="20dp"
                 style="@style/PrimaryButtonStyle"
-                app:elevation="4dp" />
+                app:elevation="4dp"
+                app:cornerRadius="999dp" />
 
             <TextView
                 android:id="@+id/tvForgotPassword"

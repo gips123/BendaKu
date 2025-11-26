@@ -22,6 +22,7 @@ import com.example.bendaku.model.StrapiResponse;
 import com.example.bendaku.model.StrapiUploadResponse;
 import com.example.bendaku.utils.SessionManager;
 import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -39,7 +40,8 @@ import retrofit2.Response;
 
 public class ClaimFormActivity extends AppCompatActivity {
 
-    private TextView tvItemName, tvProofImageHint, tvKtmImageHint;
+    private TextView tvItemName;
+    private View tvProofImageHint, tvKtmImageHint;
     private ImageView ivProofPreview, ivKtmPreview;
     private TextInputEditText etClaimDescription;
     private TextInputEditText etClaimerPhone;
@@ -67,6 +69,13 @@ public class ClaimFormActivity extends AppCompatActivity {
     }
 
     private void initViews() {
+        // Toolbar setup
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         tvItemName = findViewById(R.id.tvItemName);
         tvProofImageHint = findViewById(R.id.tvProofImageHint);
         ivProofPreview = findViewById(R.id.ivProofPreview);
@@ -111,6 +120,7 @@ public class ClaimFormActivity extends AppCompatActivity {
                         selectedProofImageUri = result.getData().getData();
                         if (selectedProofImageUri != null) {
                             ivProofPreview.setImageURI(selectedProofImageUri);
+                            ivProofPreview.setVisibility(View.VISIBLE);
                             tvProofImageHint.setVisibility(View.GONE);
                         }
                     }
@@ -379,5 +389,11 @@ public class ClaimFormActivity extends AppCompatActivity {
     private void setLoading(boolean loading) {
         btnSubmitClaim.setEnabled(!loading);
         btnSubmitClaim.setText(loading ? "Mengirim..." : getString(R.string.submit_claim));
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

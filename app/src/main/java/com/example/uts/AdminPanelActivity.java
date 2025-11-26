@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import android.view.Menu;
+import android.view.MenuItem;
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -48,6 +52,9 @@ public class AdminPanelActivity extends AppCompatActivity {
     private void initViews() {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         swipeRefresh = findViewById(R.id.swipeRefresh);
         recyclerView = findViewById(R.id.recyclerView);
@@ -83,7 +90,24 @@ public class AdminPanelActivity extends AppCompatActivity {
                 openClaimDetail(claim);
             }
         });
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        // Default to CardView layout
+        switchLayout(ClaimAdapter.VIEW_TYPE_CARDVIEW);
+        recyclerView.setAdapter(adapter);
+    }
+
+    private void switchLayout(int layoutMode) {
+        adapter.setLayoutMode(layoutMode);
+        
+        RecyclerView.LayoutManager layoutManager;
+        if (layoutMode == ClaimAdapter.VIEW_TYPE_GRID) {
+            // Grid layout with 2 columns
+            layoutManager = new GridLayoutManager(this, 2);
+        } else {
+            // List or CardView layout (vertical linear)
+            layoutManager = new LinearLayoutManager(this);
+        }
+        
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
     }
 
@@ -320,5 +344,35 @@ public class AdminPanelActivity extends AppCompatActivity {
 
     private void showError(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.admin_panel_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        
+        if (id == R.id.action_list) {
+            switchLayout(ClaimAdapter.VIEW_TYPE_LIST);
+            return true;
+        } else if (id == R.id.action_grid) {
+            switchLayout(ClaimAdapter.VIEW_TYPE_GRID);
+            return true;
+        } else if (id == R.id.action_cardview) {
+            switchLayout(ClaimAdapter.VIEW_TYPE_CARDVIEW);
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

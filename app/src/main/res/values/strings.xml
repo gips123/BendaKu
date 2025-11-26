@@ -128,7 +128,7 @@
     <string name="claimer_username">Username Klaimer</string>
     <string name="claimer_ktm_title">Foto KTM / Identitas</string>
     <string name="claimer_ktm_hint">Upload foto KTM atau kartu identitas</string>
-    <string name="reject">Tolak</string>
-    <string name="approve">Setujui</string>
+    <string name="reject">Reject</string>
+    <string name="approve">Approve</string>
 
 </resources>

@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/background_light"
-    android:fillViewport="true">
+    android:background="@color/background_light">
 
-    <LinearLayout
+    <!-- Modern App Bar with Gradient -->
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@drawable/modern_gradient_bg"
+            app:title="Klaim Barang"
+            app:titleTextColor="@android:color/white"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            app:navigationIconTint="@android:color/white" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Main Content with Nested Scroll -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="24dp">
 
         <!-- Hero Card -->
         <com.google.android.material.card.MaterialCardView
@@ -32,28 +58,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/claim_form"
-                    android:textColor="@color/design_default_color_primary"
-                    android:textSize="14sp"
+            android:textColor="@color/design_default_color_primary"
+            android:textSize="14sp"
             android:textStyle="bold"
-                    android:textAllCaps="true" />
+            android:textAllCaps="true" />
 
         <TextView
             android:id="@+id/tvItemName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Nama Barang"
-                    android:textColor="@android:color/black"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Nama Barang"
+            android:textColor="@android:color/black"
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
                 <TextView
             android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Lengkapi data klaim berikut agar tim dapat memverifikasi kepemilikan Anda."
-                    android:textColor="@android:color/darker_gray"
-                    android:textSize="13sp" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Lengkapi data klaim berikut agar tim dapat memverifikasi kepemilikan Anda."
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13sp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -136,33 +162,59 @@
             android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
-        <com.google.android.material.card.MaterialCardView
+        <!-- Photo Upload Area -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/cardProofImage"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-                    app:cardCornerRadius="14dp"
-                    app:cardElevation="3dp"
+            android:background="@drawable/photo_upload_background"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/ivProofPreview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:background="@android:color/darker_gray"
-                android:src="@android:drawable/ic_menu_camera" />
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/tvProofImageHint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Upload foto bukti kepemilikan"
-                android:textColor="@android:color/white"
-                android:textStyle="bold"
-                android:textAlignment="center" />
-                </com.google.android.material.card.MaterialCardView>
+                android:orientation="vertical"
+                android:gravity="center"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tap untuk menambah foto"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_secondary"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="(Opsional)"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_tertiary"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginTop="4dp" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -190,33 +242,59 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
-                <com.google.android.material.card.MaterialCardView
+                <!-- Photo Upload Area -->
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/cardKtmImage"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    app:cardCornerRadius="14dp"
-                    app:cardElevation="3dp"
+                    android:background="@drawable/photo_upload_background"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <ImageView
                         android:id="@+id/ivKtmPreview"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:background="@android:color/darker_gray"
-                        android:src="@android:drawable/ic_menu_camera" />
+                        android:visibility="gone"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
 
-                    <TextView
+                    <LinearLayout
                         android:id="@+id/tvKtmImageHint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/claimer_ktm_hint"
-                        android:textColor="@android:color/white"
-                        android:textStyle="bold"
-                        android:textAlignment="center" />
-                </com.google.android.material.card.MaterialCardView>
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tap untuk menambah foto"
+                            android:textSize="16sp"
+                            android:textColor="@color/text_secondary"
+                            android:fontFamily="sans-serif"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="(Opsional)"
+                            android:textSize="14sp"
+                            android:textColor="@color/text_tertiary"
+                            android:fontFamily="sans-serif"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -286,12 +364,10 @@
             android:text="@string/submit_claim"
             android:textAllCaps="false"
             android:textSize="16sp"
-            app:cornerRadius="28dp"
-            app:icon="@android:drawable/ic_menu_send"
-            app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            app:iconTint="@android:color/white" />
+            app:cornerRadius="999dp" />
 
-    </LinearLayout>
+        </LinearLayout>
 
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

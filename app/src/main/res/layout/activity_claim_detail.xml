@@ -9,18 +9,16 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary_blue"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/primary_blue"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            android:background="@drawable/modern_gradient_bg"
+            app:titleTextColor="@android:color/white"
             app:navigationIcon="@drawable/ic_arrow_back"
-            app:navigationIconTint="@android:color/white"
-            app:titleTextColor="@android:color/white">
+            app:navigationIconTint="@android:color/white">
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/statusBadge"
@@ -28,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
                 android:layout_marginEnd="16dp"
-                app:cardBackgroundColor="@color/primary_blue"
+                app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="32dp"
                 app:cardElevation="6dp">
 
@@ -41,7 +39,7 @@
                     android:text="PENDING"
                     android:textSize="12sp"
                     android:textStyle="bold"
-                    android:textColor="@android:color/white" />
+                    android:textColor="@color/primary_blue" />
             </com.google.android.material.card.MaterialCardView>
 
         </com.google.android.material.appbar.MaterialToolbar>
@@ -294,29 +292,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center"
+                android:gravity="end"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="24dp">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnApprove"
-                    style="@style/PrimaryButtonStyle"
+                    android:id="@+id/btnReject"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:text="Setujui"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
+                    android:layout_marginEnd="5dp"
+                    android:text="@string/reject"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@android:color/holo_red_dark"
+                    app:cornerRadius="999dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnReject"
-                    style="@style/SecondaryButtonStyle"
+                    android:id="@+id/btnApprove"
                     android:layout_width="0dp"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="Tolak"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelLarge" />
+                    android:layout_marginStart="5dp"
+                    android:text="@string/approve"
+                    android:backgroundTint="@android:color/holo_green_dark"
+                    app:cornerRadius="999dp" />
 
             </LinearLayout>
 
