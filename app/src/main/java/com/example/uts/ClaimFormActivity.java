@@ -290,7 +290,6 @@ public class ClaimFormActivity extends AppCompatActivity {
         } catch (Exception e) {
             setLoading(false);
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
         }
     }
 

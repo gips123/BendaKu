@@ -95,7 +95,6 @@ public class ItemListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh data whenever fragment becomes visible again to capture latest posts
         loadItems();
     }
 
@@ -103,13 +102,10 @@ public class ItemListFragment extends Fragment {
         showLoading();
         swipeRefresh.setRefreshing(true);
 
-        // Call Strapi API to get items
         Call<StrapiResponse<List<StrapiItem>>> call;
         if (itemType != null && !itemType.isEmpty()) {
-            // Get items filtered by type
             call = apiService.getItemsByType("*", itemType);
         } else {
-            // Get all items
             call = apiService.getItems("*");
         }
 
@@ -168,12 +164,9 @@ public class ItemListFragment extends Fragment {
             item.setReporterName(strapiItem.getReporterName() != null ? strapiItem.getReporterName() : "");
             item.setReporterPhone(strapiItem.getReporterPhone() != null ? strapiItem.getReporterPhone() : "");
             
-            // Handle image URL - Strapi returns relative URL, need to prepend base URL
             String imageUrl = strapiItem.getImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty()) {
-                // If URL doesn't start with http, prepend base URL
                 if (!imageUrl.startsWith("http")) {
-                    // Remove leading slash if present
                     if (imageUrl.startsWith("/")) {
                         imageUrl = imageUrl.substring(1);
                     }
@@ -199,7 +192,6 @@ public class ItemListFragment extends Fragment {
         return filtered;
     }
 
-    // Add the missing performSearch method
     public void performSearch(String query) {
         currentSearchQuery = query;
 
@@ -210,10 +202,8 @@ public class ItemListFragment extends Fragment {
         List<Item> filteredItems;
 
         if (query == null || query.trim().isEmpty()) {
-            // Show all items if search is empty
             filteredItems = new ArrayList<>(allItems);
         } else {
-            // Filter items based on search query
             String searchQuery = query.toLowerCase().trim();
             filteredItems = new ArrayList<>();
             for (Item item : allItems) {
@@ -225,7 +215,6 @@ public class ItemListFragment extends Fragment {
             }
         }
 
-        // Update adapter with filtered results
         adapter.updateItems(filteredItems);
 
         if (filteredItems.isEmpty()) {
@@ -258,7 +247,7 @@ public class ItemListFragment extends Fragment {
     }
 
     private void showError(String message) {
-        showEmpty(); // Show empty state for errors
+        showEmpty();
         if (getContext() != null) {
             Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
         }

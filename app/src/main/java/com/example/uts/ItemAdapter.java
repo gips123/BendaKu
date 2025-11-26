@@ -70,7 +70,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Initialize views with correct IDs from new layout
             ivItemImage = itemView.findViewById(R.id.ivItemImage);
             tvItemName = itemView.findViewById(R.id.tvItemName);
             tvDescription = itemView.findViewById(R.id.tvDescription);
@@ -83,15 +82,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         }
 
         public void bind(Item item, OnItemClickListener listener) {
-            // Set basic item data with null safety
             tvItemName.setText(item.getName() != null ? item.getName() : "");
             tvDescription.setText(item.getDescription() != null ? item.getDescription() : "");
             tvLocation.setText(item.getLocation() != null ? item.getLocation() : "");
 
-            // Format and set date
             try {
                 if (item.getDateTime() != null && !item.getDateTime().isEmpty()) {
-                tvDate.setText(getRelativeTimeString(item.getDateTime()));
+                    tvDate.setText(getRelativeTimeString(item.getDateTime()));
                 } else {
                     tvDate.setText("");
                 }
@@ -99,7 +96,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 tvDate.setText(item.getDateTime() != null ? item.getDateTime() : "");
             }
 
-            // Set status badge with appropriate colors
             String itemType = item.getType() != null ? item.getType() : "lost";
             if ("lost".equals(itemType)) {
                 tvStatus.setText("HILANG");
@@ -109,10 +105,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 statusBadge.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.success));
             }
 
-            // Load image with proper drawable handling
             if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
                 if (item.getImageUrl().startsWith("drawable://")) {
-                    // Handle local drawable images
                     String drawableName = item.getImageUrl().replace("drawable://", "");
                     int drawableId = getDrawableResourceId(drawableName);
                     if (drawableId != 0) {
@@ -126,7 +120,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                         ivItemImage.setImageResource(R.color.surface_variant);
                     }
                 } else {
-                    // Handle URL images
                     Glide.with(itemView.getContext())
                             .load(item.getImageUrl())
                             .centerCrop()
@@ -138,11 +131,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 ivItemImage.setImageResource(R.color.surface_variant);
             }
 
-            // Set button click listeners
             btnContact.setOnClickListener(v -> {
-                // Handle contact functionality
                 if (listener != null) {
-                    // You can implement contact logic here
                 }
             });
 
@@ -152,7 +142,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 }
             });
 
-            // Set click listener for the whole item
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(item);
@@ -161,7 +150,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         }
 
         private int getDrawableResourceId(String drawableName) {
-            // Map drawable names to resource IDs
             switch (drawableName) {
                 case "dompet":
                     return R.drawable.dompet;
@@ -176,37 +164,12 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 case "sus":
                     return R.drawable.sus;
                 default:
-                    return R.drawable.ic_item; // Default fallback
-            }
-        }
-
-        private String getCategoryIcon(String itemName, String type) {
-            // Return category icons based on item name/type
-            if (itemName == null || itemName.isEmpty()) {
-                return "📦"; // Default icon for null/empty name
-            }
-            
-            String name = itemName.toLowerCase();
-            if (name.contains("dompet") || name.contains("wallet")) {
-                return "💳";
-            } else if (name.contains("laptop") || name.contains("computer")) {
-                return "💻";
-            } else if (name.contains("kunci") || name.contains("key")) {
-                return "🔑";
-            } else if (name.contains("handphone") || name.contains("phone") || name.contains("samsung")) {
-                return "📱";
-            } else if (name.contains("jaket") || name.contains("hoodie")) {
-                return "👕";
-            } else if (name.contains("powerbank") || name.contains("charger")) {
-                return "🔋";
-            } else {
-                return "📦"; // Default icon
+                    return R.drawable.ic_item;
             }
         }
 
         private String getRelativeTimeString(String dateTime) {
-            // Simple relative time formatting
-            return dateTime; // For now, just return the original date
+            return dateTime;
         }
     }
 }

@@ -76,7 +76,6 @@ public class LoginActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Strapi login API call
         ApiService.LoginRequest request = new ApiService.LoginRequest(email, password);
         Call<StrapiAuthResponse> call = apiService.login(request);
 
@@ -88,12 +87,10 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     StrapiAuthResponse authResponse = response.body();
                     if (authResponse.isSuccess()) {
-                        // Save JWT token and user info
                         String jwt = authResponse.getJwt();
                         Integer userId = authResponse.getUser() != null ? authResponse.getUser().getId() : null;
                         sessionManager.saveJwtToken(jwt, userId);
 
-                        // Create User object and save to session
                         User user = new User();
                         if (authResponse.getUser() != null) {
                             user.setId(String.valueOf(authResponse.getUser().getId()));
@@ -112,11 +109,9 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(LoginActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    // Handle HTTP error response
                     String errorMsg = "Login gagal";
                     if (response.errorBody() != null) {
                         try {
-                            // Try to parse error message from response
                             errorMsg = "Error: " + response.code();
                         } catch (Exception e) {
                             errorMsg = "Login gagal. Silakan coba lagi.";

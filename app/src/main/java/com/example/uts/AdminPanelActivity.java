@@ -158,33 +158,41 @@ public class AdminPanelActivity extends AppCompatActivity {
     private List<Claim> convertStrapiClaimsToClaims(List<StrapiClaim> strapiClaims) {
         List<Claim> claims = new ArrayList<>();
         for (StrapiClaim strapiClaim : strapiClaims) {
+            // Get item statusItem from flat structure
+            String itemStatusItem = null;
+            if (strapiClaim.getFlatItem() != null) {
+                itemStatusItem = strapiClaim.getFlatItem().getStatusItem();
+            }
+            
+            // Only include claims where item statusItem is "open"
+            if (itemStatusItem == null || !itemStatusItem.equals("open")) {
+                continue; // Skip claims for items that are already claimed or resolved
+            }
+            
             Claim claim = new Claim();
             claim.setId(String.valueOf(strapiClaim.getId()));
-            claim.setDocumentId(strapiClaim.getDocumentId()); // Store documentId for Strapi v5
+            claim.setDocumentId(strapiClaim.getDocumentId());
             claim.setClaimerName(strapiClaim.getClaimerName());
             claim.setClaimerPhone(strapiClaim.getClaimerPhone());
             claim.setClaimerUsername(strapiClaim.getClaimerUsername());
             claim.setDescription(strapiClaim.getDescription());
-            claim.setStatus(strapiClaim.getStatusClaim()); // Map statusClaim to status
+            claim.setStatus(strapiClaim.getStatusClaim());
             claim.setAdminNotes(strapiClaim.getAdminNotes());
+            claim.setItemStatusItem(itemStatusItem);
             
-            // Set item ID from relation (handle both nested and flat structure)
             Integer itemId = strapiClaim.getItemId();
             if (itemId != null) {
                 claim.setItemId(String.valueOf(itemId));
             }
             
-            // Get item name from flat structure if available
             String itemName = strapiClaim.getItemName();
             if (itemName == null && strapiClaim.getFlatItem() != null) {
                 itemName = strapiClaim.getFlatItem().getName();
             }
             claim.setItemName(itemName);
             
-            // Save image ID for update operations
             claim.setImageId(strapiClaim.getImageId());
 
-            // Claimer KTM info
             claim.setClaimerKtmId(strapiClaim.getClaimerKtmId());
             String ktmUrl = strapiClaim.getClaimerKtmUrl();
             if (ktmUrl != null && !ktmUrl.isEmpty() && !ktmUrl.startsWith("http")) {
@@ -195,7 +203,6 @@ public class AdminPanelActivity extends AppCompatActivity {
             }
             claim.setClaimerKtmUrl(ktmUrl);
             
-            // Handle image URL
             String imageUrl = strapiClaim.getImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty() && !imageUrl.startsWith("http")) {
                 if (imageUrl.startsWith("/")) {
@@ -212,35 +219,104 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void approveClaim(Claim claim) {
-        // Update claim status to "approved" - use documentId for Strapi v5
         String claimDocumentId = claim.getDocumentId();
         if (claimDocumentId == null || claimDocumentId.isEmpty()) {
             showError("Document ID tidak tersedia");
             return;
         }
         
-        // Parse itemId to Integer
-        Integer itemIdInt = null;
+        final Integer itemIdInt;
         try {
             if (claim.getItemId() != null && !claim.getItemId().isEmpty()) {
                 itemIdInt = Integer.parseInt(claim.getItemId());
+            } else {
+                showError("Item ID tidak tersedia");
+                return;
             }
         } catch (NumberFormatException e) {
-            // Item ID not available, continue without it
+            showError("Item ID tidak valid");
+            return;
         }
         
-        // Create update request with approved status, keeping existing imageUrl, claimer, and item
+        final String finalClaimDocumentId = claimDocumentId;
+        final Claim finalClaim = claim;
+        
+        // First, fetch item to get current data
+        Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> itemCall = apiService.getItem(itemIdInt, "*");
+        itemCall.enqueue(new Callback<StrapiResponse<com.example.bendaku.model.StrapiItem>>() {
+            @Override
+            public void onResponse(Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> call, 
+                                 Response<StrapiResponse<com.example.bendaku.model.StrapiItem>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    com.example.bendaku.model.StrapiItem item = response.body().getData();
+                    if (item != null) {
+                        updateItemStatusAndClaim(item, finalClaim, finalClaimDocumentId, itemIdInt);
+                    } else {
+                        showError("Item tidak ditemukan");
+                    }
+                } else {
+                    showError("Gagal memuat data item");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> call, Throwable t) {
+                showError("Error memuat item: " + t.getMessage());
+            }
+        });
+    }
+    
+    private void updateItemStatusAndClaim(com.example.bendaku.model.StrapiItem item, Claim claim, 
+                                         String claimDocumentId, Integer itemIdInt) {
+        // Update item statusItem to "claimed"
+        ApiService.ItemRequest.ItemData itemData = new ApiService.ItemRequest.ItemData(
+                item.getName() != null ? item.getName() : "",
+                item.getDescription() != null ? item.getDescription() : "",
+                item.getLocation() != null ? item.getLocation() : "",
+                item.getDateTime() != null ? item.getDateTime() : "",
+                item.getType() != null ? item.getType() : "lost",
+                "claimed",
+                item.getReporterName() != null ? item.getReporterName() : "",
+                item.getReporterPhone() != null ? item.getReporterPhone() : "",
+                item.getImageId() != null ? item.getImageId() : null
+        );
+        
+        ApiService.ItemRequest itemRequest = new ApiService.ItemRequest(itemData);
+        
+        // Update item first
+        Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> itemUpdateCall = 
+                apiService.updateItem(itemIdInt, itemRequest);
+        itemUpdateCall.enqueue(new Callback<StrapiResponse<com.example.bendaku.model.StrapiItem>>() {
+            @Override
+            public void onResponse(Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> call,
+                                 Response<StrapiResponse<com.example.bendaku.model.StrapiItem>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    // Then update claim status
+                    updateClaimStatus(claim, claimDocumentId, itemIdInt);
+                } else {
+                    showError("Gagal update status item");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> call, Throwable t) {
+                showError("Error update item: " + t.getMessage());
+            }
+        });
+    }
+    
+    private void updateClaimStatus(Claim claim, String claimDocumentId, Integer itemIdInt) {
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claim.getClaimerName(),
                 claim.getClaimerPhone(),
                 claim.getDescription(),
-                "approved", // statusClaim
-                "Klaim disetujui oleh admin", // adminNotes
-                claim.getImageId(), // imageUrl - keep existing
+                "approved",
+                "Klaim disetujui oleh admin",
+                claim.getImageId(),
                 claim.getClaimerKtmId(),
                 claim.getClaimerUsername(),
-                itemIdInt, // item - keep existing
-                null  // locale
+                itemIdInt,
+                null
         );
         
         ApiService.ClaimRequest request = new ApiService.ClaimRequest(claimData);
@@ -250,9 +326,9 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                        Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
-                        loadPendingClaims();
-                    } else {
+                    Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
+                    loadPendingClaims();
+                } else {
                     String errorMsg = "Gagal menyetujui klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();

@@ -10,10 +10,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.bendaku.api.ApiClient;
 import com.example.bendaku.api.ApiService;
-import com.example.bendaku.model.ApiResponse;
+import com.example.bendaku.model.StrapiAuthResponse;
 import com.example.bendaku.model.User;
 import com.example.bendaku.utils.SessionManager;
-import com.example.bendaku.utils.DummyDataHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -75,41 +74,25 @@ public class RegisterActivity extends AppCompatActivity {
 
         setLoading(true);
 
-        // Menggunakan dummy data untuk testing (tanpa backend)
-        // Jalankan di background thread untuk simulasi network call
-        new Thread(() -> {
-            ApiResponse<User> response = DummyDataHelper.simulateRegister(fullName, email, password, phone, studentId);
+        String username = fullName != null && !fullName.isEmpty() ? fullName : email.split("@")[0];
+        ApiService.RegisterRequest request = new ApiService.RegisterRequest(username, email, password);
+        Call<StrapiAuthResponse> call = apiService.register(request);
 
-            // Kembali ke main thread untuk update UI
-            runOnUiThread(() -> {
-                setLoading(false);
-
-                if (response.isSuccess()) {
-                    Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login dengan password: password123", Toast.LENGTH_LONG).show();
-                    finish();
-                } else {
-                    Toast.makeText(RegisterActivity.this, response.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        }).start();
-
-        // Original API call code (commented out until backend is ready)
-        /*
-        ApiService.RegisterRequest request = new ApiService.RegisterRequest(fullName, email, password, phone, studentId);
-        Call<ApiResponse<User>> call = apiService.register(request);
-
-        call.enqueue(new Callback<ApiResponse<User>>() {
+        call.enqueue(new Callback<StrapiAuthResponse>() {
             @Override
-            public void onResponse(Call<ApiResponse<User>> call, Response<ApiResponse<User>> response) {
+            public void onResponse(Call<StrapiAuthResponse> call, Response<StrapiAuthResponse> response) {
                 setLoading(false);
 
                 if (response.isSuccessful() && response.body() != null) {
-                    ApiResponse<User> apiResponse = response.body();
-                    if (apiResponse.isSuccess()) {
+                    StrapiAuthResponse authResponse = response.body();
+                    if (authResponse.isSuccess()) {
                         Toast.makeText(RegisterActivity.this, "Registrasi berhasil! Silakan login.", Toast.LENGTH_SHORT).show();
                         finish();
                     } else {
-                        Toast.makeText(RegisterActivity.this, apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
+                        String errorMsg = authResponse.getError() != null 
+                                ? authResponse.getError().getMessage() 
+                                : "Registrasi gagal";
+                        Toast.makeText(RegisterActivity.this, errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Toast.makeText(RegisterActivity.this, "Registrasi gagal", Toast.LENGTH_SHORT).show();
@@ -117,12 +100,11 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<User>> call, Throwable t) {
+            public void onFailure(Call<StrapiAuthResponse> call, Throwable t) {
                 setLoading(false);
                 Toast.makeText(RegisterActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        */
     }
 
     private boolean validateInput(String fullName, String email, String studentId, String phone, String password, String confirmPassword) {

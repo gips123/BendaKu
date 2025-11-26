@@ -70,25 +70,21 @@ public class AddReportActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        // Toolbar setup
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Modern toggle group and buttons
         toggleGroupType = findViewById(R.id.toggleGroupType);
         btnLost = findViewById(R.id.btnLost);
         btnFound = findViewById(R.id.btnFound);
         btnSubmit = findViewById(R.id.btnSubmit);
 
-        // Photo upload elements
         ivPreview = findViewById(R.id.ivPreview);
         uploadPlaceholder = findViewById(R.id.uploadPlaceholder);
         photoUploadArea = findViewById(R.id.photoUploadArea);
 
-        // Form inputs - updated for new layout
         etItemName = findViewById(R.id.etItemName);
         etDescription = findViewById(R.id.etDescription);
         etLocation = findViewById(R.id.etLocation);
@@ -119,7 +115,6 @@ public class AddReportActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // Toggle group listener for modern type selection
         toggleGroupType.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
             if (isChecked) {
                 if (checkedId == R.id.btnLost) {
@@ -130,13 +125,9 @@ public class AddReportActivity extends AppCompatActivity {
             }
         });
 
-        // Photo upload area click
         photoUploadArea.setOnClickListener(v -> selectImage());
-
-        // Submit button
         btnSubmit.setOnClickListener(v -> submitReport());
 
-        // Toolbar back button
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -151,7 +142,6 @@ public class AddReportActivity extends AppCompatActivity {
     private void setReportType(String type) {
         this.reportType = type;
 
-        // Update button selection
         if ("lost".equals(type)) {
             toggleGroupType.check(R.id.btnLost);
         } else {
@@ -208,11 +198,9 @@ public class AddReportActivity extends AppCompatActivity {
             return;
         }
 
-        // Show loading state
         btnSubmit.setEnabled(false);
         btnSubmit.setText("Mengirim...");
 
-        // Check if user is logged in
         if (!sessionManager.isLoggedIn()) {
             btnSubmit.setEnabled(true);
             btnSubmit.setText("Kirim Laporan");
@@ -220,16 +208,13 @@ public class AddReportActivity extends AppCompatActivity {
             return;
         }
 
-        // Get current date and time in ISO 8601 format
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
         String dateTime = sdf.format(calendar.getTime());
 
-        // If image is selected, upload it first, then create item
         if (selectedImageUri != null) {
             uploadImageAndCreateItem(itemName, description, location, dateTime, name, phone);
         } else {
-            // Create item without image
             createItem(itemName, description, location, dateTime, name, phone, null);
         }
     }
@@ -237,7 +222,6 @@ public class AddReportActivity extends AppCompatActivity {
     private void uploadImageAndCreateItem(String itemName, String description, String location,
                                          String dateTime, String name, String phone) {
         try {
-            // Get file name from URI
             String fileName = "image.jpg";
             if (selectedImageUri.getScheme().equals("content")) {
                 Cursor cursor = getContentResolver().query(selectedImageUri, null, null, null, null);
@@ -252,7 +236,6 @@ public class AddReportActivity extends AppCompatActivity {
                 fileName = new File(selectedImageUri.getPath()).getName();
             }
 
-            // Read file from URI
             InputStream inputStream = getContentResolver().openInputStream(selectedImageUri);
             if (inputStream == null) {
                 btnSubmit.setEnabled(true);
@@ -261,7 +244,6 @@ public class AddReportActivity extends AppCompatActivity {
                 return;
             }
 
-            // Create temporary file
             File tempFile = new File(getCacheDir(), fileName);
             FileOutputStream outputStream = new FileOutputStream(tempFile);
             byte[] buffer = new byte[4096];
@@ -272,31 +254,24 @@ public class AddReportActivity extends AppCompatActivity {
             outputStream.close();
             inputStream.close();
 
-            // Create request body for file
             RequestBody requestFile = RequestBody.create(
                     MediaType.parse("image/*"),
                     tempFile
             );
 
-            // Create multipart part - Strapi expects "files" as the key
             MultipartBody.Part filePart = MultipartBody.Part.createFormData("files", fileName, requestFile);
 
-            // Upload file
             Call<List<StrapiUploadResponse>> uploadCall = apiService.uploadFile(filePart);
             uploadCall.enqueue(new Callback<List<StrapiUploadResponse>>() {
                 @Override
                 public void onResponse(Call<List<StrapiUploadResponse>> call, Response<List<StrapiUploadResponse>> response) {
-                    // Clean up temp file
                     if (tempFile.exists()) {
                         tempFile.delete();
                     }
 
                     if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
-                        // Get uploaded file ID
                         StrapiUploadResponse uploadResponse = response.body().get(0);
                         Integer imageId = uploadResponse.getId();
-
-                        // Create item with image ID
                         createItem(itemName, description, location, dateTime, name, phone, imageId);
                     } else {
                         btnSubmit.setEnabled(true);
@@ -311,7 +286,6 @@ public class AddReportActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<List<StrapiUploadResponse>> call, Throwable t) {
-                    // Clean up temp file
                     if (tempFile.exists()) {
                         tempFile.delete();
                     }
@@ -329,23 +303,21 @@ public class AddReportActivity extends AppCompatActivity {
             btnSubmit.setEnabled(true);
             btnSubmit.setText("Kirim Laporan");
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-            }
+        }
     }
 
     private void createItem(String itemName, String description, String location,
                            String dateTime, String name, String phone, Integer imageId) {
-        // Create item request
         ApiService.ItemRequest.ItemData itemData = new ApiService.ItemRequest.ItemData(
                 itemName,
                 description,
                 location,
                 dateTime,
-                reportType, // "lost" or "found"
-                "open", // statusItem: "open", "claimed", "resolved"
+                reportType,
+                "open",
                 name,
                 phone,
-                imageId // ID dari upload
+                imageId
         );
 
         ApiService.ItemRequest request = new ApiService.ItemRequest(itemData);
@@ -358,14 +330,13 @@ public class AddReportActivity extends AppCompatActivity {
                 btnSubmit.setText("Kirim Laporan");
 
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
-                Toast.makeText(AddReportActivity.this,
-                    "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
-                    Toast.LENGTH_LONG).show();
+                    String reportTypeText = reportType.equals("lost") ? "barang hilang" : "barang ditemukan";
+                    Toast.makeText(AddReportActivity.this,
+                        "Laporan " + reportTypeText + " berhasil dikirim!\n" + itemName,
+                        Toast.LENGTH_LONG).show();
 
-                // Close activity and return to main
-                setResult(RESULT_OK);
-                finish();
+                    setResult(RESULT_OK);
+                    finish();
                 } else {
                     String errorMsg = "Gagal mengirim laporan";
                     if (response.body() != null && response.body().getError() != null) {

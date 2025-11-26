@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Remove the toolbar title to prevent duplicate "BendaKu" when header collapses
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("");
         }
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-        // Main FAB - opens report activity
         fabAdd.setOnClickListener(v -> {
             startActivity(new Intent(this, AddReportActivity.class));
         });
@@ -107,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Trigger search in current fragment
                 triggerSearchInCurrentFragment(s.toString());
             }
 
@@ -117,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerSearchInCurrentFragment(String query) {
-        // Get the current fragment and trigger search
         int currentPosition = viewPager.getCurrentItem();
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("f" + currentPosition);
         if (fragment instanceof ItemListFragment) {
@@ -128,7 +124,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Clear search when returning to main activity
         if (searchEditText != null) {
             searchEditText.setText("");
         }
@@ -267,7 +262,6 @@ public class MainActivity extends AppCompatActivity {
                         if (userDetail.getStudentId() != null) {
                             user.setStudentId(userDetail.getStudentId());
                         }
-                        // Update isAdmin from API response
                         Boolean isAdmin = userDetail.getIsAdmin();
                         user.setAdmin(isAdmin != null && isAdmin);
                         sessionManager.updateUser(user);
@@ -277,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<StrapiUserDetail> call, Throwable t) {
-                // Silently fail - user data will remain as is
             }
         });
     }
@@ -288,13 +281,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // First check from session
         if (sessionManager.getUser().isAdmin()) {
             startActivity(new Intent(this, AdminPanelActivity.class));
             return;
         }
 
-        // If not admin in session, fetch from API to be sure
         if (apiService == null || sessionManager.getJwtToken() == null) {
             Toast.makeText(this, "Akses ditolak. Hanya admin yang bisa mengakses halaman ini.", Toast.LENGTH_SHORT).show();
             return;
@@ -309,7 +300,6 @@ public class MainActivity extends AppCompatActivity {
                     Boolean isAdmin = userDetail.getIsAdmin();
                     boolean isAdminUser = isAdmin != null && isAdmin;
 
-                    // Update session
                     com.example.bendaku.model.User user = sessionManager.getUser();
                     if (user != null) {
                         user.setAdmin(isAdminUser);

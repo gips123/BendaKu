@@ -15,6 +15,7 @@ public class Claim {
     private String claimerKtmUrl;
     private String claimerUsername;
     private String status; // "pending_verification", "approved", "rejected"
+    private String itemStatusItem; // "open", "claimed", "resolved" - status dari item yang di-claim
     private String createdAt;
     private String adminNotes;
 
@@ -73,6 +74,9 @@ public class Claim {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getItemStatusItem() { return itemStatusItem; }
+    public void setItemStatusItem(String itemStatusItem) { this.itemStatusItem = itemStatusItem; }
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
