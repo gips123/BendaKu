@@ -77,7 +77,7 @@ public class ItemRepository {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     List<StrapiItem> strapiItems = response.body().getData();
                     if (strapiItems != null) {
-                        saveItemsToDatabase(strapiItems, statusItem);
+                        saveItemsToDatabase(strapiItems, statusItem, type);
                     }
                 }
             }
@@ -89,9 +89,10 @@ public class ItemRepository {
         });
     }
 
-    private void saveItemsToDatabase(List<StrapiItem> strapiItems, String filterStatus) {
+    private void saveItemsToDatabase(List<StrapiItem> strapiItems, String filterStatus, String typeFilter) {
         executor.execute(() -> {
             List<LocalItem> localItems = new ArrayList<>();
+            List<String> syncedDocumentIds = new ArrayList<>();
             long syncTime = System.currentTimeMillis();
 
             for (StrapiItem strapiItem : strapiItems) {
@@ -132,12 +133,27 @@ public class ItemRepository {
                 localItem.lastSyncTime = syncTime;
 
                 localItems.add(localItem);
+                if (localItem.documentId != null && !localItem.documentId.isEmpty()) {
+                    syncedDocumentIds.add(localItem.documentId);
+                }
             }
 
             if (!localItems.isEmpty()) {
                 itemDao.insertItems(localItems);
             }
+
+            if (filterStatus != null) {
+                if (!syncedDocumentIds.isEmpty()) {
+                    itemDao.deleteItemsNotInDocumentIds(typeFilter, filterStatus, syncedDocumentIds);
+                } else {
+                    itemDao.deleteItemsByTypeAndStatus(typeFilter, filterStatus);
+                }
+            }
         });
+    }
+
+    private void clearItemsForFilter(String type, String statusItem) {
+        executor.execute(() -> itemDao.deleteItemsByTypeAndStatus(type, statusItem));
     }
 
     private List<Item> convertLocalItemsToItems(List<LocalItem> localItems) {
@@ -166,6 +182,10 @@ public class ItemRepository {
             String updatedAt = String.valueOf(syncTime);
             itemDao.updateItemStatus(itemId, statusItem, updatedAt, syncTime);
         });
+    }
+
+    public void syncAllItems() {
+        syncItemsFromApi(null, "open");
     }
 }
 

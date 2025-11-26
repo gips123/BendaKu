@@ -41,5 +41,11 @@ public interface ItemDao {
 
     @Query("UPDATE items SET statusItem = :statusItem, updatedAt = :updatedAt, lastSyncTime = :syncTime WHERE itemId = :itemId")
     void updateItemStatus(String itemId, String statusItem, String updatedAt, long syncTime);
+
+    @Query("DELETE FROM items WHERE (:type IS NULL OR type = :type) AND statusItem = :statusItem AND documentId NOT IN (:documentIds)")
+    void deleteItemsNotInDocumentIds(String type, String statusItem, List<String> documentIds);
+
+    @Query("DELETE FROM items WHERE (:type IS NULL OR type = :type) AND statusItem = :statusItem")
+    void deleteItemsByTypeAndStatus(String type, String statusItem);
 }
 

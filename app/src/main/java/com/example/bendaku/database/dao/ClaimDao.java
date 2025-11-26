@@ -39,6 +39,9 @@ public interface ClaimDao {
     @Query("DELETE FROM claims WHERE claimId = :claimId")
     void deleteClaim(String claimId);
 
+    @Query("DELETE FROM claims WHERE documentId = :documentId")
+    void deleteClaimByDocumentId(String documentId);
+
     @Query("DELETE FROM claims")
     void deleteAllClaims();
 
@@ -47,5 +50,11 @@ public interface ClaimDao {
 
     @Query("UPDATE claims SET itemStatusItem = :itemStatus WHERE itemId = :itemId")
     void updateClaimsItemStatus(String itemId, String itemStatus);
+
+    @Query("DELETE FROM claims WHERE statusClaim = :status AND itemStatusItem = :itemStatus AND documentId NOT IN (:documentIds)")
+    void deleteClaimsNotInDocumentIds(String status, String itemStatus, List<String> documentIds);
+
+    @Query("DELETE FROM claims WHERE statusClaim = :status AND itemStatusItem = :itemStatus")
+    void deleteClaimsByStatusAndItemStatus(String status, String itemStatus);
 }
 

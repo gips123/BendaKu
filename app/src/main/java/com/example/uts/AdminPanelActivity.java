@@ -326,10 +326,14 @@ public class AdminPanelActivity extends AppCompatActivity {
                     if (claimRepository != null) {
                         claimRepository.updateClaimStatus(claimDocumentId, "approved", "Klaim disetujui oleh admin");
                         claimRepository.updateClaimsItemStatus(claim.getItemId(), "claimed");
+                        claimRepository.removeClaimByDocumentId(claimDocumentId);
                     }
-                        Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
-                        loadPendingClaims();
-                    } else {
+                    if (adapter != null) {
+                        adapter.removeClaimByDocumentId(claimDocumentId);
+                    }
+                    Toast.makeText(AdminPanelActivity.this, "Klaim disetujui", Toast.LENGTH_SHORT).show();
+                    loadPendingClaims();
+                } else {
                     String errorMsg = "Gagal menyetujui klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();
@@ -387,10 +391,14 @@ public class AdminPanelActivity extends AppCompatActivity {
                     // Update database
                     if (claimRepository != null) {
                         claimRepository.updateClaimStatus(claimDocumentId, "rejected", "Klaim ditolak oleh admin");
+                        claimRepository.removeClaimByDocumentId(claimDocumentId);
                     }
-                        Toast.makeText(AdminPanelActivity.this, "Klaim ditolak", Toast.LENGTH_SHORT).show();
-                        loadPendingClaims();
-                    } else {
+                    if (adapter != null) {
+                        adapter.removeClaimByDocumentId(claimDocumentId);
+                    }
+                    Toast.makeText(AdminPanelActivity.this, "Klaim ditolak", Toast.LENGTH_SHORT).show();
+                    loadPendingClaims();
+                } else {
                     String errorMsg = "Gagal menolak klaim";
                     if (response.body() != null && response.body().getError() != null) {
                         errorMsg = response.body().getError().getMessage();

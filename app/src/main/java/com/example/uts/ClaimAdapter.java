@@ -88,6 +88,18 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
+    public void removeClaimByDocumentId(String documentId) {
+        if (documentId == null || documentId.isEmpty()) return;
+        for (int i = 0; i < claims.size(); i++) {
+            Claim claim = claims.get(i);
+            if (documentId.equals(claim.getDocumentId())) {
+                claims.remove(i);
+                notifyItemRemoved(i);
+                return;
+            }
+        }
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView ivProofImage;
         private TextView tvItemName;

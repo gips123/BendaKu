@@ -82,6 +82,7 @@ public class ClaimRepository {
     private void saveClaimsToDatabase(List<StrapiClaim> strapiClaims) {
         executor.execute(() -> {
             List<LocalClaim> localClaims = new ArrayList<>();
+            List<String> syncedDocumentIds = new ArrayList<>();
             long syncTime = System.currentTimeMillis();
 
             for (StrapiClaim strapiClaim : strapiClaims) {
@@ -146,10 +147,19 @@ public class ClaimRepository {
                 localClaim.lastSyncTime = syncTime;
 
                 localClaims.add(localClaim);
+                if (localClaim.documentId != null && !localClaim.documentId.isEmpty()) {
+                    syncedDocumentIds.add(localClaim.documentId);
+                }
             }
 
             if (!localClaims.isEmpty()) {
                 claimDao.insertClaims(localClaims);
+            }
+
+            if (!syncedDocumentIds.isEmpty()) {
+                claimDao.deleteClaimsNotInDocumentIds("pending", "open", syncedDocumentIds);
+            } else {
+                claimDao.deleteClaimsByStatusAndItemStatus("pending", "open");
             }
         });
     }
@@ -191,6 +201,15 @@ public class ClaimRepository {
         executor.execute(() -> {
             claimDao.updateClaimsItemStatus(itemId, itemStatus);
         });
+    }
+
+    public void syncAllClaims() {
+        syncClaimsFromApi();
+    }
+
+    public void removeClaimByDocumentId(String documentId) {
+        if (documentId == null || documentId.isEmpty()) return;
+        executor.execute(() -> claimDao.deleteClaimByDocumentId(documentId));
     }
 }
 

@@ -19,9 +19,14 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.widget.Toast;
 
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.view.View;
+
 import com.example.bendaku.api.ApiClient;
 import com.example.bendaku.api.ApiService;
 import com.example.bendaku.model.StrapiUserDetail;
+import com.example.bendaku.receiver.NetworkStateReceiver;
 import com.example.bendaku.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -42,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText searchEditText;
     private SessionManager sessionManager;
     private ApiService apiService;
+    private NetworkStateReceiver networkStateReceiver;
+    private View offlineIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,16 @@ public class MainActivity extends AppCompatActivity {
         setupViewPager();
         setupClickListeners();
         setupSearch();
+        setupNetworkReceiver();
         refreshUserData();
+        // Check network state after views are ready
+        viewPager.post(() -> {
+            // Ensure offlineIndicator is found after views are inflated
+            if (offlineIndicator == null) {
+                offlineIndicator = findViewById(R.id.offlineIndicator);
+            }
+            checkNetworkState();
+        });
     }
 
     private void initViews() {
@@ -68,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         fabAdd = findViewById(R.id.fabAdd);
         searchEditText = findViewById(R.id.searchEditText);
+        // When using <include>, views inside can be accessed directly
+        offlineIndicator = findViewById(R.id.offlineIndicator);
     }
 
     private void initServices() {
@@ -121,11 +139,75 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void setupNetworkReceiver() {
+        networkStateReceiver = new NetworkStateReceiver();
+        networkStateReceiver.setListener(isConnected -> {
+            updateOfflineIndicator(!isConnected);
+        });
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(NetworkStateReceiver.ACTION_NETWORK_STATE_CHANGED);
+        
+        // For Android 13+ (API 33+), need to specify RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(networkStateReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(networkStateReceiver, filter);
+        }
+    }
+
+    private void checkNetworkState() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        if (cm != null) {
+            boolean isConnected = false;
+            android.net.Network activeNetwork = cm.getActiveNetwork();
+            if (activeNetwork != null) {
+                android.net.NetworkCapabilities capabilities = cm.getNetworkCapabilities(activeNetwork);
+                if (capabilities != null) {
+                    isConnected = capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_WIFI) ||
+                                 capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                                 capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_ETHERNET);
+                }
+            }
+            // Fallback for older Android versions
+            if (!isConnected) {
+                android.net.NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+                isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+            }
+            updateOfflineIndicator(!isConnected);
+        }
+    }
+
+    private void updateOfflineIndicator(boolean isOffline) {
+        // Find the view - now it's directly in activity_main.xml, not in include
+        if (offlineIndicator == null) {
+            offlineIndicator = findViewById(R.id.offlineIndicator);
+        }
+        
+        if (offlineIndicator != null) {
+            offlineIndicator.setVisibility(isOffline ? View.VISIBLE : View.GONE);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         if (searchEditText != null) {
             searchEditText.setText("");
+        }
+        checkNetworkState();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (networkStateReceiver != null) {
+            try {
+                unregisterReceiver(networkStateReceiver);
+            } catch (IllegalArgumentException e) {
+                // Receiver was not registered
+            }
         }
     }
 
