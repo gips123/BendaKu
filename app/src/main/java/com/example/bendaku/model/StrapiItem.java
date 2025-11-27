@@ -17,7 +17,6 @@ public class StrapiItem implements Serializable {
     @SerializedName("attributes")
     private Attributes attributes;
 
-    // Flat structure support (when Strapi response is sanitized without attributes wrapper)
     @SerializedName("name")
     private String flatName;
 
@@ -80,7 +79,6 @@ public class StrapiItem implements Serializable {
         this.attributes = attributes;
     }
 
-    // Helper methods to access attributes directly
     public String getName() {
         if (attributes != null && attributes.name != null) {
             return attributes.name;
@@ -224,7 +222,6 @@ public class StrapiItem implements Serializable {
         @SerializedName("publishedAt")
         private String publishedAt;
 
-        // Getters and setters
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
 

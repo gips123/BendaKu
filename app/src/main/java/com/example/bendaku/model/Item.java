@@ -11,7 +11,7 @@ public class Item implements Serializable {
     private String location;
     private String dateTime;
     private String imageUrl;
-    private String type; // "lost" or "found"
+    private String type;
     private String reporterId;
     private String reporterName;
     private String reporterPhone;
@@ -35,7 +35,6 @@ public class Item implements Serializable {
         this.status = "active";
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

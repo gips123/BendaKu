@@ -9,16 +9,16 @@ public class LocalClaim {
     @PrimaryKey(autoGenerate = true)
     public long id;
 
-    public String claimId; // Strapi ID
-    public String documentId; // Strapi documentId
-    public String itemId; // Related item ID
+    public String claimId;
+    public String documentId;
+    public String itemId;
     public String itemName;
-    public String itemStatusItem; // Status from related item
+    public String itemStatusItem;
     public String claimerName;
     public String claimerPhone;
     public String claimerUsername;
     public String description;
-    public String statusClaim; // "pending", "approved", "rejected"
+    public String statusClaim;
     public String adminNotes;
     public String proofImageUrl;
     public Integer imageId;
@@ -26,6 +26,6 @@ public class LocalClaim {
     public Integer claimerKtmId;
     public String createdAt;
     public String updatedAt;
-    public long lastSyncTime; // Timestamp when data was last synced from API
+    public long lastSyncTime;
 }
 

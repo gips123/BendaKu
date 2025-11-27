@@ -119,7 +119,6 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
         }
 
         public void bind(Claim claim, OnClaimActionListener listener) {
-            // Display item name if available, otherwise show item ID
             String itemDisplay = claim.getItemName() != null && !claim.getItemName().isEmpty() 
                     ? claim.getItemName() 
                     : (claim.getItemId() != null ? "Item ID: " + claim.getItemId() : "Item tidak diketahui");
@@ -130,7 +129,6 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
                     : "Tidak ada deskripsi";
             tvClaimDescription.setText("Deskripsi : " + description);
 
-            // Load proof image
             String imageUrl = claim.getProofImageUrl();
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 Glide.with(itemView.getContext())
@@ -144,14 +142,12 @@ public class ClaimAdapter extends RecyclerView.Adapter<ClaimAdapter.ViewHolder> 
                 ivProofImage.setVisibility(View.GONE);
             }
 
-            // Handle item click to open detail
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(claim);
                 }
             });
 
-            // Set button listeners only if buttons exist (not in list mode)
             if (btnApprove != null) {
                 btnApprove.setOnClickListener(v -> {
                     if (listener != null) {

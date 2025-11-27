@@ -8,7 +8,7 @@ import com.example.bendaku.utils.SessionManager;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int SPLASH_DELAY = 2000; // 2 seconds
+    private static final int SPLASH_DELAY = 2000;
     private SessionManager sessionManager;
 
     @Override

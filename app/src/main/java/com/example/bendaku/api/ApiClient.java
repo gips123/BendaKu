@@ -10,7 +10,6 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -26,13 +25,8 @@ public class ApiClient {
 
     public static Retrofit getClient() {
         if (retrofit == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
 
-            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                    .addInterceptor(logging);
-
-            // Add Authorization interceptor if context is available
             if (appContext != null) {
                 clientBuilder.addInterceptor(new Interceptor() {
                     @Override
@@ -44,7 +38,6 @@ public class ApiClient {
                         Request.Builder requestBuilder = original.newBuilder()
                                 .header("Content-Type", "application/json");
 
-                        // Add Authorization header if JWT token exists
                         if (jwt != null && !jwt.isEmpty()) {
                             requestBuilder.header("Authorization", "Bearer " + jwt);
                         }

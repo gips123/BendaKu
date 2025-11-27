@@ -41,7 +41,6 @@ public class StrapiResponse<T> {
     }
 
     public static class Meta {
-        // Meta fields if needed
     }
 
     public static class StrapiError {

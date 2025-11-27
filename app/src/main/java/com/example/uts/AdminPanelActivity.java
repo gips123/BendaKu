@@ -96,7 +96,6 @@ public class AdminPanelActivity extends AppCompatActivity {
                 openClaimDetail(claim);
             }
         });
-        // Default to CardView layout
         switchLayout(ClaimAdapter.VIEW_TYPE_CARDVIEW);
         recyclerView.setAdapter(adapter);
     }
@@ -106,10 +105,8 @@ public class AdminPanelActivity extends AppCompatActivity {
         
         RecyclerView.LayoutManager layoutManager;
         if (layoutMode == ClaimAdapter.VIEW_TYPE_GRID) {
-            // Grid layout with 2 columns
             layoutManager = new GridLayoutManager(this, 2);
         } else {
-            // List or CardView layout (vertical linear)
             layoutManager = new LinearLayoutManager(this);
         }
         
@@ -151,13 +148,11 @@ public class AdminPanelActivity extends AppCompatActivity {
     private List<Claim> convertStrapiClaimsToClaims(List<StrapiClaim> strapiClaims) {
         List<Claim> claims = new ArrayList<>();
         for (StrapiClaim strapiClaim : strapiClaims) {
-            // Get item statusItem from flat structure
             String itemStatusItem = null;
             if (strapiClaim.getFlatItem() != null) {
                 itemStatusItem = strapiClaim.getFlatItem().getStatusItem();
             }
             
-            // Only include claims where item statusItem is "open"
             if (itemStatusItem == null || !itemStatusItem.equals("open")) {
                 continue; // Skip claims for items that are already claimed or resolved
             }
@@ -234,7 +229,6 @@ public class AdminPanelActivity extends AppCompatActivity {
         final String finalClaimDocumentId = claimDocumentId;
         final Claim finalClaim = claim;
         
-        // First, fetch item to get current data
         Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> itemCall = apiService.getItem(itemIdInt, "*");
         itemCall.enqueue(new Callback<StrapiResponse<com.example.bendaku.model.StrapiItem>>() {
             @Override
@@ -261,7 +255,6 @@ public class AdminPanelActivity extends AppCompatActivity {
     
     private void updateItemStatusAndClaim(com.example.bendaku.model.StrapiItem item, Claim claim, 
                                          String claimDocumentId, Integer itemIdInt) {
-        // Update item statusItem to "claimed"
         ApiService.ItemRequest.ItemData itemData = new ApiService.ItemRequest.ItemData(
                 item.getName() != null ? item.getName() : "",
                 item.getDescription() != null ? item.getDescription() : "",
@@ -276,7 +269,6 @@ public class AdminPanelActivity extends AppCompatActivity {
         
         ApiService.ItemRequest itemRequest = new ApiService.ItemRequest(itemData);
         
-        // Update item first
         Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> itemUpdateCall = 
                 apiService.updateItem(itemIdInt, itemRequest);
         itemUpdateCall.enqueue(new Callback<StrapiResponse<com.example.bendaku.model.StrapiItem>>() {
@@ -284,7 +276,6 @@ public class AdminPanelActivity extends AppCompatActivity {
             public void onResponse(Call<StrapiResponse<com.example.bendaku.model.StrapiItem>> call,
                                  Response<StrapiResponse<com.example.bendaku.model.StrapiItem>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Then update claim status
                     updateClaimStatus(claim, claimDocumentId, itemIdInt);
                 } else {
                     showError("Gagal update status item");
@@ -319,7 +310,6 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Update database
                     if (itemRepository != null && claim.getItemId() != null) {
                         itemRepository.updateItemStatus(claim.getItemId(), "claimed");
                     }
@@ -350,24 +340,20 @@ public class AdminPanelActivity extends AppCompatActivity {
     }
 
     private void rejectClaim(Claim claim) {
-        // Update claim status to "rejected" - use documentId for Strapi v5
         String claimDocumentId = claim.getDocumentId();
         if (claimDocumentId == null || claimDocumentId.isEmpty()) {
             showError("Document ID tidak tersedia");
             return;
         }
         
-        // Parse itemId to Integer
         Integer itemIdInt = null;
         try {
             if (claim.getItemId() != null && !claim.getItemId().isEmpty()) {
                 itemIdInt = Integer.parseInt(claim.getItemId());
             }
         } catch (NumberFormatException e) {
-            // Item ID not available, continue without it
         }
         
-        // Create update request with rejected status, keeping existing imageUrl, claimer, and item
         ApiService.ClaimRequest.ClaimData claimData = new ApiService.ClaimRequest.ClaimData(
                 claim.getClaimerName(),
                 claim.getClaimerPhone(),
@@ -388,7 +374,6 @@ public class AdminPanelActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<StrapiResponse<StrapiClaim>> call, Response<StrapiResponse<StrapiClaim>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    // Update database
                     if (claimRepository != null) {
                         claimRepository.updateClaimStatus(claimDocumentId, "rejected", "Klaim ditolak oleh admin");
                         claimRepository.removeClaimByDocumentId(claimDocumentId);

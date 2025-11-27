@@ -42,7 +42,6 @@ public class ItemRepository {
     }
 
     public void getItems(String type, String statusItem, DataCallback callback) {
-        // First, load from database (offline support)
         executor.execute(() -> {
             List<LocalItem> localItems;
             if (type != null && !type.isEmpty()) {
@@ -51,13 +50,8 @@ public class ItemRepository {
                 localItems = itemDao.getItemsByStatus(statusItem);
             }
 
-            // Convert to Item model
             List<Item> items = convertLocalItemsToItems(localItems);
-            
-            // Return cached data immediately
             mainHandler.post(() -> callback.onDataLoaded(items));
-
-            // Then, try to sync from API in background
             syncItemsFromApi(type, statusItem);
         });
     }
@@ -84,7 +78,6 @@ public class ItemRepository {
 
             @Override
             public void onFailure(Call<StrapiResponse<List<StrapiItem>>> call, Throwable t) {
-                // Silent fail - user already has cached data
             }
         });
     }
@@ -101,7 +94,6 @@ public class ItemRepository {
                 String itemStatus = strapiItem.getStatusItem();
                 if (itemStatus == null) itemStatus = "open";
 
-                // Only save items that match the filter status
                 if (filterStatus != null && !filterStatus.equals(itemStatus)) {
                     continue;
                 }

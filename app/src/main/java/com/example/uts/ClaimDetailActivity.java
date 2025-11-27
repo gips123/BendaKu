@@ -88,7 +88,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
     }
 
     private void loadClaimDetail() {
-        // Use documentId for Strapi v5
         Call<StrapiResponse<StrapiClaim>> call = apiService.getClaim(claimDocumentId, "*");
         call.enqueue(new Callback<StrapiResponse<StrapiClaim>>() {
             @Override
@@ -96,13 +95,10 @@ public class ClaimDetailActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
                     StrapiClaim claim = response.body().getData();
                     if (claim != null) {
-                        // Get item documentId from claim response
                         String itemDocumentId = getItemDocumentId(claim);
                         if (itemDocumentId != null && !itemDocumentId.isEmpty()) {
-                            // Fetch item separately with imageUrl populated
                             loadItemDetail(itemDocumentId, claim);
                         } else {
-                            // If no item documentId, just display claim without item image
                             displayClaimDetail(claim, null);
                         }
                     } else {
@@ -128,11 +124,9 @@ public class ClaimDetailActivity extends AppCompatActivity {
     }
 
     private String getItemDocumentId(StrapiClaim claim) {
-        // Try to get documentId from flatItem
         if (claim.getFlatItem() != null && claim.getFlatItem().getDocumentId() != null) {
             return claim.getFlatItem().getDocumentId();
         }
-        // Try to get from nested structure
         if (claim.getAttributes() != null && claim.getAttributes().getItem() != null) {
             if (claim.getAttributes().getItem().getFlatDocumentId() != null) {
                 return claim.getAttributes().getItem().getFlatDocumentId();
@@ -146,7 +140,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
     }
 
     private void loadItemDetail(String itemDocumentId, StrapiClaim claim) {
-        // Fetch item with imageUrl populated
         Call<StrapiResponse<StrapiItem>> itemCall = 
             apiService.getItemByDocumentId(itemDocumentId, "*");
         itemCall.enqueue(new Callback<StrapiResponse<StrapiItem>>() {
@@ -158,7 +151,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
                     StrapiItem item = response.body().getData();
                     displayClaimDetail(claim, item);
                 } else {
-                    // If item fetch fails, display claim without item image
                     displayClaimDetail(claim, null);
                 }
             }
@@ -167,7 +159,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
             public void onFailure(
                     Call<StrapiResponse<StrapiItem>> call,
                     Throwable t) {
-                // If item fetch fails, display claim without item image
                 displayClaimDetail(claim, null);
             }
         });
@@ -191,7 +182,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
             tvItemType.setText("N/A");
         }
 
-        // Load item image from separately fetched item
         if (item != null) {
             String itemImageUrl = item.getImageUrl();
             if (itemImageUrl != null && !itemImageUrl.isEmpty()) {
@@ -204,7 +194,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
                 Glide.with(this).load(itemImageUrl).into(ivItemImage);
             }
         } else {
-            // Fallback: try to load from claim's flatItem if available
             if (claim.getFlatItem() != null) {
                 StrapiClaim.FlatImage itemImage = claim.getFlatItem().getImageUrl();
                 if (itemImage != null && itemImage.getUrl() != null && !itemImage.getUrl().isEmpty()) {
@@ -324,14 +313,12 @@ public class ClaimDetailActivity extends AppCompatActivity {
     }
 
     private void rejectClaim(StrapiClaim strapiClaim) {
-        // Get documentId from StrapiClaim for Strapi v5
         String claimDocumentId = strapiClaim.getDocumentId();
         if (claimDocumentId == null || claimDocumentId.isEmpty()) {
             Toast.makeText(this, "Document ID tidak tersedia", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Convert StrapiClaim to Claim for update
         Claim claim = new Claim();
         claim.setId(String.valueOf(strapiClaim.getId()));
         claim.setDocumentId(claimDocumentId);
@@ -345,8 +332,6 @@ public class ClaimDetailActivity extends AppCompatActivity {
         if (itemId != null) {
             claim.setItemId(String.valueOf(itemId));
         }
-
-        Integer itemIdInt = null;
         try {
             if (claim.getItemId() != null && !claim.getItemId().isEmpty()) {
                 itemIdInt = Integer.parseInt(claim.getItemId());

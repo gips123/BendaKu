@@ -20,7 +20,6 @@ public class StrapiUploadResponse {
     @SerializedName("size")
     private Double size;
 
-    // For array response
     private List<StrapiUploadResponse> uploads;
 
     public Integer getId() {

@@ -69,7 +69,6 @@ public class ClaimFormActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        // Toolbar setup
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -183,7 +182,6 @@ public class ClaimFormActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if user is logged in
         if (!sessionManager.isLoggedIn()) {
             Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
             return;
@@ -300,7 +298,6 @@ public class ClaimFormActivity extends AppCompatActivity {
             claimerName = sessionManager.getUser().getFullName();
         }
 
-        // Parse itemId to Integer
         Integer itemIdInt = null;
         try {
             if (itemId != null && !itemId.isEmpty()) {

@@ -35,17 +35,14 @@ public class NetworkStateReceiver extends BroadcastReceiver {
             
             boolean isConnected = isNetworkAvailable(context);
             
-            // Notify listener
             if (listener != null) {
                 listener.onNetworkStateChanged(isConnected);
             }
             
-            // Broadcast to other components
             Intent broadcastIntent = new Intent(ACTION_NETWORK_STATE_CHANGED);
             broadcastIntent.putExtra(EXTRA_IS_CONNECTED, isConnected);
             context.sendBroadcast(broadcastIntent);
             
-            // Auto-sync when online
             if (isConnected) {
                 syncDataFromStrapi(context);
             }
@@ -68,22 +65,18 @@ public class NetworkStateReceiver extends BroadcastReceiver {
                         capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_ETHERNET)
                     );
                 }
-                // Fallback for older Android versions
                 NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
                 return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
             }
         } catch (Exception e) {
-            // Ignored - fallback to false
         }
         return false;
     }
 
     private void syncDataFromStrapi(Context context) {
-        // Sync items
         ItemRepository itemRepository = new ItemRepository(context);
         itemRepository.syncAllItems();
         
-        // Sync claims (only for admin users)
         ClaimRepository claimRepository = new ClaimRepository(context);
         claimRepository.syncAllClaims();
     }

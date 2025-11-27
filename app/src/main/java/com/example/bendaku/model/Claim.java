@@ -2,7 +2,7 @@ package com.example.bendaku.model;
 
 public class Claim {
     private String id;
-    private String documentId; // Strapi v5 documentId
+    private String documentId;
     private String itemId;
     private String itemName;
     private String claimerId;
@@ -10,12 +10,12 @@ public class Claim {
     private String claimerPhone;
     private String description;
     private String proofImageUrl;
-    private Integer imageId; // ID foto bukti
-    private Integer claimerKtmId; // ID foto KTM/identitas
+    private Integer imageId;
+    private Integer claimerKtmId;
     private String claimerKtmUrl;
     private String claimerUsername;
-    private String status; // "pending_verification", "approved", "rejected"
-    private String itemStatusItem; // "open", "claimed", "resolved" - status dari item yang di-claim
+    private String status;
+    private String itemStatusItem;
     private String createdAt;
     private String adminNotes;
 
@@ -32,7 +32,6 @@ public class Claim {
         this.status = "pending_verification";
     }
 
-    // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

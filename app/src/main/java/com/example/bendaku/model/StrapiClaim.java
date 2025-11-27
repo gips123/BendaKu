@@ -13,7 +13,6 @@ public class StrapiClaim implements Serializable {
     @SerializedName("attributes")
     private Attributes attributes;
 
-    // Flat structure support (when Strapi response is sanitized without attributes wrapper)
     @SerializedName("documentId")
     private String documentId;
 
@@ -79,7 +78,6 @@ public class StrapiClaim implements Serializable {
         this.attributes = attributes;
     }
 
-    // Helper methods
     public String getClaimerName() {
         if (attributes != null && attributes.claimerName != null) {
             return attributes.claimerName;
@@ -123,13 +121,11 @@ public class StrapiClaim implements Serializable {
     }
 
     public String getImageUrl() {
-        // Check nested structure first
         if (attributes != null && attributes.imageUrl != null && attributes.imageUrl.data != null) {
             if (attributes.imageUrl.data.attributes != null) {
                 return attributes.imageUrl.data.attributes.url;
             }
         }
-        // Check flat structure
         if (flatImageUrl != null) {
             return flatImageUrl.getUrl();
         }
@@ -137,7 +133,6 @@ public class StrapiClaim implements Serializable {
     }
 
     public String getClaimerKtmUrl() {
-        // Check nested structure first
         if (attributes != null && attributes.claimerKtm != null) {
             if (attributes.claimerKtm.data != null && attributes.claimerKtm.data.attributes != null) {
                 return attributes.claimerKtm.data.attributes.url;
@@ -146,7 +141,6 @@ public class StrapiClaim implements Serializable {
                 return attributes.claimerKtm.directUrl;
             }
         }
-        // Check flat structure
         if (flatClaimerKtm != null) {
             return flatClaimerKtm.getUrl();
         }
@@ -154,7 +148,6 @@ public class StrapiClaim implements Serializable {
     }
 
     public Integer getClaimerKtmId() {
-        // Check nested structure first
         if (attributes != null && attributes.claimerKtm != null) {
             if (attributes.claimerKtm.data != null) {
                 return attributes.claimerKtm.data.id;
@@ -163,7 +156,6 @@ public class StrapiClaim implements Serializable {
                 return attributes.claimerKtm.directId;
             }
         }
-        // Check flat structure
         if (flatClaimerKtm != null) {
             return flatClaimerKtm.getId();
         }
@@ -171,11 +163,9 @@ public class StrapiClaim implements Serializable {
     }
 
     public Integer getImageId() {
-        // Check nested structure first
         if (attributes != null && attributes.imageUrl != null && attributes.imageUrl.data != null) {
             return attributes.imageUrl.data.id;
         }
-        // Check flat structure
         if (flatImageUrl != null) {
             return flatImageUrl.getId();
         }
@@ -197,18 +187,14 @@ public class StrapiClaim implements Serializable {
     }
 
     public Integer getItemId() {
-        // Check nested structure first
         if (attributes != null && attributes.item != null) {
-            // Handle flat structure (item is direct ID)
             if (attributes.item.directId != null) {
                 return attributes.item.directId;
             }
-            // Handle nested structure (item.data.id)
             if (attributes.item.data != null && attributes.item.data.id != null) {
                 return attributes.item.data.id;
             }
         }
-        // Check flat structure
         if (flatItem != null) {
             return flatItem.getId();
         }
@@ -216,21 +202,16 @@ public class StrapiClaim implements Serializable {
     }
 
     public StrapiItem getItem() {
-        // Check nested structure first
         if (attributes != null && attributes.item != null) {
-            // Handle nested structure (item.data.attributes)
             if (attributes.item.data != null && attributes.item.data.item != null) {
                 return attributes.item.data.item;
             }
         }
-        // Flat structure returns null for full item object (only ID available)
         return null;
     }
 
     public String getItemName() {
-        // Check nested structure first
         if (attributes != null && attributes.item != null) {
-            // Handle nested structure
             if (attributes.item.data != null) {
                 if (attributes.item.data.item != null) {
                     return attributes.item.data.item.getName();
@@ -239,12 +220,10 @@ public class StrapiClaim implements Serializable {
                     return attributes.item.data.flatName;
                 }
             }
-            // Handle flat structure
             if (attributes.item.flatName != null) {
                 return attributes.item.flatName;
             }
         }
-        // Check flat structure
         if (flatItem != null) {
             return flatItem.getName();
         }
@@ -292,7 +271,6 @@ public class StrapiClaim implements Serializable {
         @SerializedName("updatedAt")
         private String updatedAt;
 
-        // Getters and setters
         public String getClaimerName() { return claimerName; }
         public void setClaimerName(String claimerName) { this.claimerName = claimerName; }
 
@@ -430,7 +408,6 @@ public class StrapiClaim implements Serializable {
         @SerializedName("id")
         private Integer directId;
 
-        // Flat structure support (when item is directly an object, not nested in data)
         @SerializedName("name")
         private String flatName;
 
@@ -453,7 +430,6 @@ public class StrapiClaim implements Serializable {
         @SerializedName("attributes")
         private StrapiItem item;
 
-        // Flat structure support (when item is directly an object)
         @SerializedName("name")
         private String flatName;
 
@@ -470,7 +446,6 @@ public class StrapiClaim implements Serializable {
         public String getFlatDocumentId() { return flatDocumentId; }
     }
 
-    // Flat structure classes
     public static class FlatImage {
         @SerializedName("id")
         private Integer id;

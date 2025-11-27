@@ -25,156 +25,81 @@ import retrofit2.http.Query;
 
 public interface ApiService {
 
-    // ========== Auth Endpoints ==========
-    /**
-     * Login to Strapi
-     * POST /api/auth/local
-     * Body: {"identifier": "email or username", "password": "****"}
-     */
     @POST("api/auth/local")
     Call<StrapiAuthResponse> login(@Body LoginRequest request);
 
-    /**
-     * Register new user
-     * POST /api/auth/local/register
-     */
     @POST("api/auth/local/register")
     Call<StrapiAuthResponse> register(@Body RegisterRequest request);
 
-    // ========== Upload Endpoint ==========
-    /**
-     * Upload file/image
-     * POST /api/upload
-     * Multipart form-data with key "files" and Authorization header
-     * Returns array of uploaded files
-     */
     @Multipart
     @POST("api/upload")
     Call<List<StrapiUploadResponse>> uploadFile(@Part MultipartBody.Part file);
 
-    // ========== Items Endpoints ==========
-    /**
-     * Get all items with populated relations
-     * GET /api/items?populate=*
-     */
     @GET("api/items")
     Call<StrapiResponse<List<StrapiItem>>> getItems(@Query("populate") String populate);
 
-    /**
-     * Get items filtered by type
-     * GET /api/items?populate=*&filters[type][$eq]=lost
-     */
     @GET("api/items")
     Call<StrapiResponse<List<StrapiItem>>> getItemsByType(
             @Query("populate") String populate,
             @Query("filters[type][$eq]") String type
     );
 
-    /**
-     * Get single item by ID
-     * GET /api/items/{id}?populate=*
-     */
     @GET("api/items/{id}")
     Call<StrapiResponse<StrapiItem>> getItem(
             @Path("id") Integer id,
             @Query("populate") String populate
     );
 
-    /**
-     * Get single item by documentId (Strapi v5)
-     * GET /api/items/{documentId}?populate=*
-     */
     @GET("api/items/{documentId}")
     Call<StrapiResponse<StrapiItem>> getItemByDocumentId(
             @Path("documentId") String documentId,
             @Query("populate") String populate
     );
 
-    /**
-     * Create new item
-     * POST /api/items
-     * Body: {"data": {...}}
-     */
     @POST("api/items")
     Call<StrapiResponse<StrapiItem>> createItem(@Body ItemRequest request);
 
-    /**
-     * Update item
-     * PUT /api/items/{id}
-     */
     @PUT("api/items/{id}")
     Call<StrapiResponse<StrapiItem>> updateItem(
             @Path("id") Integer id,
             @Body ItemRequest request
     );
 
-    /**
-     * Delete item
-     * DELETE /api/items/{id}
-     */
     @DELETE("api/items/{id}")
     Call<StrapiResponse<StrapiItem>> deleteItem(@Path("id") Integer id);
 
-    // ========== Claims Endpoints ==========
-    /**
-     * Get all claims with populated relations
-     * GET /api/claims?populate=*
-     */
     @GET("api/claims")
     Call<StrapiResponse<List<StrapiClaim>>> getClaims(@Query("populate") String populate);
 
-    /**
-     * Get claims filtered by status
-     * GET /api/claims?populate=*&filters[statusClaim][$eq]=pending
-     */
     @GET("api/claims")
     Call<StrapiResponse<List<StrapiClaim>>> getClaimsByStatus(
             @Query("populate") String populate,
             @Query("filters[statusClaim][$eq]") String status
     );
 
-    /**
-     * Get single claim by documentId (Strapi v5)
-     * GET /api/claims/{documentId}?populate=*
-     */
     @GET("api/claims/{documentId}")
     Call<StrapiResponse<StrapiClaim>> getClaim(
             @Path("documentId") String documentId,
             @Query("populate") String populate
     );
 
-    /**
-     * Create new claim
-     * POST /api/claims
-     * Body: {"data": {...}}
-     */
     @POST("api/claims")
     Call<StrapiResponse<StrapiClaim>> createClaim(@Body ClaimRequest request);
 
-    /**
-     * Update claim (Strapi v5 uses documentId)
-     * PUT /api/claims/{documentId}
-     */
     @PUT("api/claims/{documentId}")
     Call<StrapiResponse<StrapiClaim>> updateClaim(
             @Path("documentId") String documentId,
             @Body ClaimRequest request
     );
 
-    /**
-     * Delete claim
-     * DELETE /api/claims/{id}
-     */
     @DELETE("api/claims/{id}")
     Call<StrapiResponse<StrapiClaim>> deleteClaim(@Path("id") Integer id);
 
-    // User profile
     @GET("api/users/me")
     Call<StrapiUserDetail> getCurrentUser(@Query("populate") String populate);
 
-    // ========== Request Classes ==========
     class LoginRequest {
-        public String identifier; // email or username
+        public String identifier;
         public String password;
 
         public LoginRequest(String identifier, String password) {
@@ -207,11 +132,11 @@ public interface ApiService {
             public String description;
             public String location;
             public String dateTime;
-            public String type; // "lost" or "found"
-            public String statusItem; // "open", "claimed", "resolved"
+            public String type;
+            public String statusItem;
             public String reporterName;
             public String reporterPhone;
-            public Integer imageUrl; // ID of uploaded file
+            public Integer imageUrl;
 
             public ItemData(String name, String description, String location, String dateTime,
                            String type, String statusItem, String reporterName, String reporterPhone,
@@ -241,13 +166,13 @@ public interface ApiService {
             public String claimerPhone;
             public String claimerUsername;
             public String description;
-            public String statusClaim; // "pending", "approved", "rejected"
+            public String statusClaim;
             public String adminNotes;
-            public Integer imageUrl; // ID of uploaded file
+            public Integer imageUrl;
             @SerializedName("claimerktm")
-            public Integer claimerKtm; // ID foto KTM/identitas
-            public Integer item; // ID of the item being claimed
-            public String locale; // Optional: for multi-language
+            public Integer claimerKtm;
+            public Integer item;
+            public String locale;
 
             public ClaimData(String claimerName, String claimerPhone, String description,
                            String statusClaim, String adminNotes, Integer imageUrl,

@@ -62,9 +62,7 @@ public class MainActivity extends AppCompatActivity {
         setupSearch();
         setupNetworkReceiver();
         refreshUserData();
-        // Check network state after views are ready
         viewPager.post(() -> {
-            // Ensure offlineIndicator is found after views are inflated
             if (offlineIndicator == null) {
                 offlineIndicator = findViewById(R.id.offlineIndicator);
             }
@@ -84,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         fabAdd = findViewById(R.id.fabAdd);
         searchEditText = findViewById(R.id.searchEditText);
-        // When using <include>, views inside can be accessed directly
         offlineIndicator = findViewById(R.id.offlineIndicator);
     }
 
@@ -149,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(NetworkStateReceiver.ACTION_NETWORK_STATE_CHANGED);
         
-        // For Android 13+ (API 33+), need to specify RECEIVER_EXPORTED or RECEIVER_NOT_EXPORTED
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(networkStateReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED);
         } else {
@@ -170,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
                                  capabilities.hasTransport(android.net.NetworkCapabilities.TRANSPORT_ETHERNET);
                 }
             }
-            // Fallback for older Android versions
             if (!isConnected) {
                 android.net.NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
                 isConnected = activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
@@ -180,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateOfflineIndicator(boolean isOffline) {
-        // Find the view - now it's directly in activity_main.xml, not in include
         if (offlineIndicator == null) {
             offlineIndicator = findViewById(R.id.offlineIndicator);
         }
@@ -206,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 unregisterReceiver(networkStateReceiver);
             } catch (IllegalArgumentException e) {
-                // Receiver was not registered
             }
         }
     }
@@ -331,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
                     StrapiUserDetail userDetail = response.body();
                     com.example.bendaku.model.User user = sessionManager.getUser();
                     if (user != null) {
-                        // Update user data from API response
                         if (userDetail.getFullName() != null) {
                             user.setFullName(userDetail.getFullName());
                         }

@@ -167,7 +167,6 @@ public class AddReportActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
 
-        // Validation
         if (TextUtils.isEmpty(itemName)) {
             etItemName.setError("Nama barang harus diisi");
             etItemName.requestFocus();

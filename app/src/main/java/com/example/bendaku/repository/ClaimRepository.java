@@ -42,18 +42,10 @@ public class ClaimRepository {
     }
 
     public void getPendingClaims(DataCallback callback) {
-        // First, load from database (offline support)
         executor.execute(() -> {
-            // Only get claims where item statusItem is "open"
             List<LocalClaim> localClaims = claimDao.getClaimsByStatusAndItemStatus("pending", "open");
-
-            // Convert to Claim model
             List<Claim> claims = convertLocalClaimsToClaims(localClaims);
-            
-            // Return cached data immediately
             mainHandler.post(() -> callback.onDataLoaded(claims));
-
-            // Then, try to sync from API in background
             syncClaimsFromApi();
         });
     }
@@ -74,7 +66,6 @@ public class ClaimRepository {
 
             @Override
             public void onFailure(Call<StrapiResponse<List<StrapiClaim>>> call, Throwable t) {
-                // Silent fail - user already has cached data
             }
         });
     }
@@ -88,13 +79,11 @@ public class ClaimRepository {
             for (StrapiClaim strapiClaim : strapiClaims) {
                 if (strapiClaim == null) continue;
 
-                // Get item statusItem from flat structure
                 String itemStatusItem = null;
                 if (strapiClaim.getFlatItem() != null) {
                     itemStatusItem = strapiClaim.getFlatItem().getStatusItem();
                 }
 
-                // Only save claims where item statusItem is "open"
                 if (itemStatusItem == null || !itemStatusItem.equals("open")) {
                     continue;
                 }
